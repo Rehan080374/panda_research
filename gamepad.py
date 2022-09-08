@@ -1,5 +1,5 @@
 from evdev import InputDevice, categorize, ecodes,KeyEvent
-gamepad = InputDevice('/dev/input/event3')
+gamepad = InputDevice('/dev/input/event17')
 #if your event is not event3, then change to yours
 print (gamepad)
 for event in gamepad.read_loop():

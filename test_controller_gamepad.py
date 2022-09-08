@@ -598,6 +598,20 @@ class MoveGroupPythonInterfaceTutorial(object):
         elif string == 'sub1' :
          joint_goal[5] = joint_goal[5]-0.1
          move_group.go(joint_goal, wait=True) 
+        elif string == 'add2' :
+         joint_goal[4] = joint_goal[4]+0.1
+         move_group.go(joint_goal, wait=True)
+         
+        elif string == 'sub2' :
+         joint_goal[4] = joint_goal[4]-0.1
+         move_group.go(joint_goal, wait=True)  
+        elif string == 'add3' :
+         joint_goal[3] = joint_goal[3]+0.1
+         move_group.go(joint_goal, wait=True)
+         
+        elif string == 'sub3' :
+         joint_goal[3] = joint_goal[3]-0.1
+         move_group.go(joint_goal, wait=True)  
         
           
                 
@@ -1241,7 +1255,31 @@ def main():
                         print ('rotate down')
                         tutorial.gripper_control('add1')
                         tutorial.write_file()
-                        #print (absevent.event.value)                  
+                        #print (absevent.event.value)      
+                if ecodes.bytype[absevent.event.type][absevent.event.code] == 'ABS_HAT0X':
+                    
+                    if absevent.event.value > 0 :
+                        print ('rotate up')
+                        tutorial.gripper_control('sub2')
+                        tutorial.write_file()
+                        #print (absevent.event.value)
+                    elif absevent.event.value < 0:
+                        print ('rotate down')
+                        tutorial.gripper_control('add2')
+                        tutorial.write_file()
+                        #print (absevent.event.value)  
+                if ecodes.bytype[absevent.event.type][absevent.event.code] == 'ABS_HAT0Y':
+                    
+                    if absevent.event.value > 0 :
+                        print ('rotate up')
+                        tutorial.gripper_control('sub3')
+                        tutorial.write_file()
+                        #print (absevent.event.value)
+                    elif absevent.event.value < 0:
+                        print ('rotate down')
+                        tutorial.gripper_control('add3')
+                        tutorial.write_file()
+                        #print (absevent.event.value)              
                 if ecodes.bytype[absevent.event.type][absevent.event.code] == 'ABS_RZ':
                     
                     if absevent.event.value > 254 :
