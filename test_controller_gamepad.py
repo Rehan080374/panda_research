@@ -50,7 +50,7 @@ from pickle import TRUE
 from socket import timeout
 #from six.moves import input
 from evdev import InputDevice, categorize, ecodes,KeyEvent
-gamepad = InputDevice('/dev/input/event3')
+gamepad = InputDevice('/dev/input/event17')
 
 
 import sys
@@ -88,7 +88,7 @@ from moveit_commander.conversions import pose_to_list
 
 ## END_SUB_TUTORIAL
 # opening the file in read mode
-#my_file = open("/home/rehan/ws_moveit/src/moveit_tutorials/doc/move_group_python_interface/scripts/joint_angles.txt", "r")
+#my_file = open("/home/panda/ws_moveit/src/moveit_tutorials/doc/move_group_python_interface/scripts/joint_angles.txt", "r")
   
 # reading the file
 #data = my_file.read()
@@ -109,14 +109,14 @@ opened=[0.037,0.037]
 closed=[0.0,0.0]
 
 pick=[0.3330900495280648,-0.4473527946126987,0.09144908081004947,0.9160861559973409,-0.40053923792457446,0.007851307718949254,0.01711229499275589]
-with open('/home/rehan/ws_moveit/src/joint_angles.csv', 'w', encoding='UTF8') as f:
+with open('/home/panda/ws_moveit/src/joint_angles.csv', 'w', encoding='UTF8') as f:
             writer= csv.writer(f)
             header=('joint_goal[0]','joint_goal[1]','joint_goal[2]','joint_goal[3]','joint_goal[4]','joint_goal[5]','joint_goal[6]','joint_goal[7]','joint_goal[8]')
             #header=['position.x','position.y','position.z','orientation.x','orientation.y','orientation.z','orientation.w','gripper_pose']
             #write the header
             writer.writerow(header)
             f.close()
-with open('/home/rehan/ws_moveit/src/joint_angles1.csv', 'w', encoding='UTF8') as o:
+with open('/home/panda/ws_moveit/src/joint_angles1.csv', 'w', encoding='UTF8') as o:
             write= csv.writer(o)
             header=('joint_goal[0]','joint_goal[1]','joint_goal[2]','joint_goal[3]','joint_goal[4]','joint_goal[5]','joint_goal[6]','joint_goal[7]','joint_goal[8]')
             #header=['position.x','position.y','position.z','orientation.x','orientation.y','orientation.z','orientation.w','gripper_pose']
@@ -396,7 +396,7 @@ class MoveGroupPythonInterfaceTutorial(object):
                     p='closed'
                 else:
                     p='opened'    
-                d1= pd.read_csv('/home/rehan/ws_moveit/src/joint_angles.csv')
+                d1= pd.read_csv('/home/panda/ws_moveit/src/joint_angles.csv')
                 print(d1)
                 print ("number of rows in file are ==" ,len(d1))
                 #print("if the data looks good press X to execute ")
@@ -429,7 +429,7 @@ class MoveGroupPythonInterfaceTutorial(object):
                         p='closed'
                     else:
                         p='opened'    
-                    d= pd.read_csv('/home/rehan/ws_moveit/src/moveit_tutorials/data/joint_angles1.csv')
+                    d= pd.read_csv('/home/panda/ws_moveit/src/moveit_tutorials/data/joint_angles1.csv')
                     print(d)
                     print ("number of rows in file are ==" ,len(d))
                     n=input("if the data looks good press Y to execute ")
@@ -461,7 +461,7 @@ class MoveGroupPythonInterfaceTutorial(object):
                         p='closed'
                     else:
                         p='opened'    
-                    d1= pd.read_csv('/home/rehan/ws_moveit/src/joint_angles.csv')
+                    d1= pd.read_csv('/home/panda/ws_moveit/src/joint_angles.csv')
                     print(d1)
                     print ("number of rows in file are ==" ,len(d1))
                     n=input("if the data looks good press Y to execute ")
@@ -500,9 +500,9 @@ class MoveGroupPythonInterfaceTutorial(object):
 
 
             print("pose =",joint_goal)
-            #data= pd.read_csv('/home/rehan/ws_moveit/src/joint_angles.csv')
+            #data= pd.read_csv('/home/panda/ws_moveit/src/joint_angles.csv')
             
-            with open('/home/rehan/ws_moveit/src/joint_angles1.csv', 'a+', encoding='UTF8') as f:
+            with open('/home/panda/ws_moveit/src/joint_angles1.csv', 'a+', encoding='UTF8') as f:
                 writer = csv.writer(f)
                 # write the data
                 writer.writerow(joint_goal)
@@ -524,9 +524,9 @@ class MoveGroupPythonInterfaceTutorial(object):
 
 
             print("pose =",joint_goal)
-            #data= pd.read_csv('/home/rehan/ws_moveit/src/joint_angles.csv')
+            #data= pd.read_csv('/home/panda/ws_moveit/src/joint_angles.csv')
             
-            with open('/home/rehan/ws_moveit/src/joint_angles.csv', 'a+', encoding='UTF8') as f:
+            with open('/home/panda/ws_moveit/src/joint_angles.csv', 'a+', encoding='UTF8') as f:
                 writer = csv.writer(f)
                 # write the data
                 writer.writerow(joint_goal)
@@ -584,11 +584,19 @@ class MoveGroupPythonInterfaceTutorial(object):
          joint_goal[0] = closed[0]
          joint_goal[1] = closed[1]
         elif string == 'add' :
-         joint_goal[6] = joint_goal[6]+0.9
+         joint_goal[6] = joint_goal[6]+0.2
+         move_group.go(joint_goal, wait=True)
          
         elif string == 'sub' :
-         joint_goal[6] = joint_goal[6]-0.9
+         joint_goal[6] = joint_goal[6]-0.2
          move_group.go(joint_goal, wait=True)
+        elif string == 'add1' :
+         joint_goal[5] = joint_goal[5]+0.1
+         move_group.go(joint_goal, wait=True)
+         
+        elif string == 'sub1' :
+         joint_goal[5] = joint_goal[5]-0.1
+         move_group.go(joint_goal, wait=True) 
         
           
                 
@@ -1209,6 +1217,30 @@ def main():
                         tutorial.moveright(speed)
                         tutorial.write_file()
                         #print (absevent.event.value)
+                if ecodes.bytype[absevent.event.type][absevent.event.code] == 'ABS_RX':
+                    
+                    if absevent.event.value > 32766 :
+                        print ('rotate right')
+                        tutorial.gripper_control('add')
+                        tutorial.write_file()
+                        #print (absevent.event.value)
+                    elif absevent.event.value < -32766:
+                        print ('rotate left')
+                        tutorial.gripper_control('sub')
+                        tutorial.write_file()
+                        #print (absevent.event.value)  
+                if ecodes.bytype[absevent.event.type][absevent.event.code] == 'ABS_RY':
+                    
+                    if absevent.event.value >= 32767 :
+                        print ('rotate up')
+                        tutorial.gripper_control('sub1')
+                        tutorial.write_file()
+                        #print (absevent.event.value)
+                    elif absevent.event.value <= -32768:
+                        print ('rotate down')
+                        tutorial.gripper_control('add1')
+                        tutorial.write_file()
+                        #print (absevent.event.value)                  
                 if ecodes.bytype[absevent.event.type][absevent.event.code] == 'ABS_RZ':
                     
                     if absevent.event.value > 254 :
