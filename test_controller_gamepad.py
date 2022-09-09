@@ -1314,13 +1314,13 @@ def main():
                 if ecodes.bytype[absevent.event.type][absevent.event.code] == 'ABS_RZ':
                     
                     if absevent.event.value > 254 :
-                        speed+=0.1
+                        speed+=0.5
                         print("step length = ", speed)
                         #print (absevent.event.value)
                 if ecodes.bytype[absevent.event.type][absevent.event.code] == 'ABS_Z':
                     
                     if absevent.event.value > 254 :
-                        speed-=0.1
+                        speed-=0.5
                         print("step length = ", speed)
                         #print (absevent.event.value)           
                 # if ecodes.bytype[absevent.event.type][absevent.event.code] == 'ABS_RY':
