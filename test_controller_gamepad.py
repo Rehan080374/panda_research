@@ -46,6 +46,7 @@
 from __future__ import print_function
 from ast import While
 from email import header
+import imp
 from ossaudiodev import control_names
 from pickle import TRUE
 from socket import timeout
@@ -68,6 +69,8 @@ import geometry_msgs.msg
 import tty, sys, termios
 import csv 
 from franka_gripper.msg import GraspAction, GraspGoal,MoveAction,MoveGoal
+from franka_msgs.msg import ErrorRecoveryActionGoal,ErrorRecoveryActionFeedback
+
 
 
 filedescriptors = termios.tcgetattr(sys.stdin)
@@ -559,6 +562,15 @@ class MoveGroupPythonInterfaceTutorial(object):
         display_trajectory.trajectory.append(plan)
         display_trajectory_publisher.publish(display_trajectory)
         move_group.execute(plan, wait=True)
+    def talker(self):
+        
+
+        pub = rospy.Publisher('/franka_control/error_recovery/goal',ErrorRecoveryActionGoal, queue_size=10)
+        str = ErrorRecoveryActionGoal()
+        str.goal={}
+        pub.publish(str)
+        #rospy.wait_for_message('/franka_control/error_recovery/feedback',ErrorRecoveryActionFeedback)
+            
 
     def gripper_control(self,string):
         
@@ -1142,7 +1154,9 @@ def main():
                 #tutorial.gripper_control('op')
                 #tutorial.check_hand_pose()
             
-            
+            elif event1 == 'm' or event1 == 'M':
+                tutorial.talker()
+                
             
             elif event1 == 'c' or event1 == 'C':
                 tutorial.grasp_client('cl')
@@ -1202,6 +1216,10 @@ def main():
                         print ("down") 
                         tutorial.movedown(speed)
                         tutorial.write_file() 
+                    elif keyevent.keycode == 'BTN_START':
+                        print ("error recovery started please wait 3 sec") 
+                        tutorial.talker()
+                            
                     elif keyevent.keycode == 'BTN_SELECT':
                         print("stoping")
                         break
