@@ -15,7 +15,7 @@ index = count()
 
 
 def animate(i):
-    data = pd.read_csv('/home/rehan/ws_moveit/src/effort_data.csv')
+    data = pd.read_csv('/home/panda/ws_moveit/src/effort_data.csv')
     #x = data['x_value']
    
     y1 = data['joint_effort[0]']

@@ -52,7 +52,7 @@ from pickle import TRUE
 from socket import timeout
 #from six.moves import input
 from evdev import InputDevice, categorize, ecodes,KeyEvent
-gamepad = InputDevice('/dev/input/event17')
+
 
 
 import sys
@@ -597,11 +597,11 @@ class MoveGroupPythonInterfaceTutorial(object):
          joint_goal[0] = closed[0]
          joint_goal[1] = closed[1]
         elif string == 'add' :
-         joint_goal[6] = joint_goal[6]+0.2
+         joint_goal[6] = joint_goal[6]+0.5
          move_group.go(joint_goal, wait=True)
          
         elif string == 'sub' :
-         joint_goal[6] = joint_goal[6]-0.2
+         joint_goal[6] = joint_goal[6]-0.5
          move_group.go(joint_goal, wait=True)
         elif string == 'add1' :
          joint_goal[5] = joint_goal[5]+0.1
@@ -694,32 +694,62 @@ class MoveGroupPythonInterfaceTutorial(object):
         display_trajectory.trajectory.append(plan)
         display_trajectory_publisher.publish(display_trajectory)
         move_group.execute(plan, wait=True)
-    def data(self,scale):
-        while(True):
-            group_name = "panda_arm"
-            #move_group = self.move_group
-            move_group = moveit_commander.MoveGroupCommander(group_name)
-            wpose = move_group.get_current_pose().pose
-            waypoints = []
-            wpose.position.y += scale * 0.01 # moveright
-            waypoints.append(copy.deepcopy(wpose))
-            (plan, fraction) = move_group.compute_cartesian_path(waypoints, 0.01, 0.0 )  
-            #robot = self.robot
-            #display_trajectory_publisher = self.display_trajectory_publisher
-            #display_trajectory = moveit_msgs.msg.DisplayTrajectory()
-            #display_trajectory.trajectory_start = robot.get_current_state()
-            #display_trajectory.trajectory.append(plan)
-            #display_trajectory_publisher.publish(display_trajectory)
-            move_group.execute(plan, wait=True)
-            rospy.sleep(5)
-            move_group = moveit_commander.MoveGroupCommander(group_name)
-            wpose1 = move_group.get_current_pose().pose
-            waypoints1 = []
-            wpose1.position.y -= scale * 0.01 # moveright
-            waypoints1.append(copy.deepcopy(wpose1))
-            (plan, fraction) = move_group.compute_cartesian_path(waypoints1, 0.01, 0.0 ) 
-            move_group.execute(plan, wait=True)
-            rospy.sleep(5)
+    def data(self,scale,string):
+        #while(True):
+            if string == 'a':
+                group_name = "panda_arm"
+                #move_group = self.move_group
+                move_group = moveit_commander.MoveGroupCommander(group_name)
+                wpose = move_group.get_current_pose().pose
+                waypoints = []
+                wpose.position.y += scale * 0.01 # moveright
+                waypoints.append(copy.deepcopy(wpose))
+                (plan, fraction) = move_group.compute_cartesian_path(waypoints, 0.01, 0.0 )  
+                
+                move_group.execute(plan, wait=True)
+                rospy.sleep(5)
+                move_group = moveit_commander.MoveGroupCommander(group_name)
+                wpose1 = move_group.get_current_pose().pose
+                waypoints1 = []
+                wpose1.position.y -= scale * 0.01 # moveright
+                waypoints1.append(copy.deepcopy(wpose1))
+                (plan, fraction) = move_group.compute_cartesian_path(waypoints1, 0.01, 0.0 ) 
+                move_group.execute(plan, wait=True)
+                rospy.sleep(5)
+            if string == 'b':
+                group_name = "panda_arm"
+                move_group = self.move_group
+                move_group = moveit_commander.MoveGroupCommander(group_name)
+                wpose2 = move_group.get_current_pose().pose
+                print("y_orientation",wpose2)
+                waypoints2 = []
+                wpose2.position.x=0.31849339733685345
+                wpose2.position.y=0.001712022045827885
+                wpose2.position.z=0.5782304066820235
+                wpose2.orientation.x = -0.920268721473281 
+                wpose2.orientation.y = -0.3893779208513452
+                wpose2.orientation.z = -0.025048974775792317
+                wpose2.orientation.w = 0.029374545002400186
+                waypoints2.append(copy.deepcopy(wpose2))
+                (plan, fraction) = move_group.compute_cartesian_path(waypoints2, 0.01, 0.0 )  
+             
+                move_group.execute(plan, wait=True)
+                rospy.sleep(5)
+                move_group = moveit_commander.MoveGroupCommander(group_name)
+                wpose3 = move_group.get_current_pose().pose
+                print("y_orientation",wpose3.orientation.y)
+                waypoints3 = []
+                wpose3.position.x=0.30664646468284157
+                wpose3.position.y=0.003363342522298818
+                wpose3.position.z=0.5623913028029793
+                wpose3.orientation.x = -0.9390901126737115 
+                wpose3.orientation.y = -0.3429201927839085
+                wpose3.orientation.z = 0.019292033519401702
+                wpose3.orientation.w = 0.011971595641731645
+                waypoints3.append(copy.deepcopy(wpose3))
+                (plan, fraction) = move_group.compute_cartesian_path(waypoints3, 0.01, 0.0 ) 
+                move_group.execute(plan, wait=True)
+                rospy.sleep(5)    
     def moveleft(self,scale):
         group_name = "panda_arm"
         #move_group = self.move_group
@@ -1094,42 +1124,24 @@ def main():
                 tutorial.gripper_control('add')
                 tutorial.write_file()
             elif event1 == 'g' or event1 == 'G':
-                #j=0
+                print ("data collection activated")
+                d=True
+                while d==True:
                 
-                    while True:
-                        try:
-                            print ("data collection activated")
-                            #tutorial.rotate_left (1)
-                            tutorial.data(speed)
-                            #rospy.sleep(2)
-                            #tutorial.moveleft(speed)
-                            #rospy.sleep(2)
-                        #j+=1
-                        except KeyboardInterrupt :
-                            break
-                        
+                    tutorial.gripper_control('add')
+                    rospy.sleep(5)
+                    tutorial.gripper_control('sub')
+                    rospy.sleep(5)
+                     
+                            
                 
-
+                               
                 
-                    
-                    
-                #tutorial.write_file()
             elif event1 == 'n' or event1 == 'N':
-                #j=0
-                    
-                    while True:
-                        print ("data collection activated")
-                        #tutorial.rotate_left (1)
-                        tutorial.gripper_control('add')
-                        rospy.sleep(2)
-                        tutorial.gripper_control('sub')
-                        rospy.sleep(2)
-                        #j+=1  
-                        if KeyboardInterrupt is True:
-                            break
+                print ("data collection activated rotation")
+                tutorial.data(speed,'a')
             
-                
-                        
+                      
             elif event1 == 'o'or event1 == 'O':
                 print ("right rotation ")
                 #tutorial.check_hand_pose()
@@ -1174,6 +1186,7 @@ def main():
             else:
                 print("stop")
     elif i == '2':
+        gamepad = InputDevice('/dev/input/event17')
         print("joystick control started\n")
         for event in gamepad.read_loop():
             print("enter the direction with left joystck\n"  
