@@ -695,7 +695,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         display_trajectory_publisher.publish(display_trajectory)
         move_group.execute(plan, wait=True)
     def data(self,scale,string):
-        #while(True):
+        while(True):
             if string == 'a':
                 group_name = "panda_arm"
                 #move_group = self.move_group
@@ -1125,8 +1125,8 @@ def main():
                 tutorial.write_file()
             elif event1 == 'g' or event1 == 'G':
                 print ("data collection activated")
-                d=True
-                while d==True:
+                
+                while True:
                 
                     tutorial.gripper_control('add')
                     rospy.sleep(5)
