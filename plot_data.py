@@ -30,12 +30,12 @@ def animate(i):
 
     plt.cla()
 
-    plt.plot(  y1, label='joint_effort[0]')
-    plt.plot(  y2, label='joint_effort[1]') 
-    plt.plot(  y3, label='joint_effort[2]')
-    plt.plot(  y4, label='joint_effort[3]')
-    plt.plot(  y5, label='joint_effort[4]')
-    plt.plot(  y6, label='joint_effort[5]')
+    plt.plot(  y1, label='joint_effort[x]')
+    plt.plot(  y2, label='joint_effort[y]') 
+    plt.plot(  y3, label='joint_effort[z]')
+    plt.plot(  y4, label='joint_effort[RX]')
+    plt.plot(  y5, label='joint_effort[Ry]')
+    plt.plot(  y6, label='joint_effort[Rz]')
     #plt.plot(  y7, label='joint_effort[6]')
     #plt.plot(  y8, label='joint_effort[7]') 
     #plt.plot(  y9, label='joint_effort[8]')
