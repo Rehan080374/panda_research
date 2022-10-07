@@ -24,7 +24,7 @@ def callback(data):
     
     
     
-    with open('/home/panda/ws_moveit/src/effort_data.csv', 'a+', encoding='UTF8') as f:
+    with open('/home/rehan/ws_moveit/src/effort_data.csv', 'a+', encoding='UTF8') as f:
             writer = csv.writer(f)
             #write the data
             writer.writerow(joint_effort)
@@ -61,7 +61,7 @@ if __name__ == '__main__':
    
 
    
-    with open('/home/panda/ws_moveit/src/effort_data.csv', 'w', encoding='UTF8') as o:
+    with open('/home/rehan/ws_moveit/src/effort_data.csv', 'w', encoding='UTF8') as o:
             write= csv.writer(o)
             header=('joint_effort[0]','joint_effort[1]','joint_effort[2]','joint_effort[3]','joint_effort[4]','joint_effort[5]','joint_effort[6]','joint_effort[7]','joint_effort[8]')
             #header=['position.x','position.y','position.z','orientation.x','orientation.y','orientation.z','orientation.w','gripper_pose']
