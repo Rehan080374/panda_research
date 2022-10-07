@@ -1,10 +1,12 @@
 from __future__ import print_function
+from array import array
 from ast import While
-from ctypes.wintypes import PCHAR
+from ctypes.wintypes import PCHAR, SIZE
 from email import header
 import imp
 from ossaudiodev import control_names
 from pickle import TRUE
+from re import A, X
 from socket import timeout
 #from six.moves import input
 from evdev import InputDevice, categorize, ecodes,KeyEvent
@@ -15,6 +17,7 @@ import sys
 from turtle import position
 from matplotlib.pyplot import tick_params
 import pandas as pd 
+import numpy as np
 import copy
 import rospy
 import actionlib
@@ -38,7 +41,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-
+global var
 
 import csv
 joint_effort=[]
@@ -46,9 +49,10 @@ class MoveGroupPythonInterfaceTutorial(object):
     """MoveGroupPythonInterfaceTutorial"""
 
     def __init__(self):
-        super(MoveGroupPythonInterfaceTutorial, self).__init__()
-
         
+        super(MoveGroupPythonInterfaceTutorial, self).__init__()
+        c=[]
+        self.a=np.array(c)
         moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node("move_group_python_interface_tutorial", anonymous=True) 
         
@@ -64,8 +68,8 @@ class MoveGroupPythonInterfaceTutorial(object):
         planning_frame = move_group.get_planning_frame()
         
         eef_link = move_group.get_end_effector_link()
-        
-
+        #print(eef_link)
+        #print(robot.get_current_state())
         # We can get a list of all the groups in the robot:
         group_names = robot.get_group_names()
        
@@ -77,79 +81,94 @@ class MoveGroupPythonInterfaceTutorial(object):
         self.planning_frame = planning_frame
         self.eef_link = eef_link
         self.group_names = group_names
-
+    def data(self,array):
+        self.a=self.a.append(array)
 
     def callback(self,data):
-    
+        global var
+        joint_effort=[]
+        
         #joint_effort=data
         #rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.effort)
         # joint_effort =data.tau_ext_hat_filtered
         joint_effort =[data.wrench.force.x,data.wrench.force.y,data.wrench.force.z,data.wrench.torque.x,data.wrench.torque.y,data.wrench.torque.z]
-        print("effort data =",joint_effort)
-        group_name = "panda_arm"
+        joint_effort=np.array(joint_effort)
+        test.data(joint_effort)
+        #var=np.append(joint_effort)
+        #print("effort data =",joint_effort,"type =",type(joint_effort))
+        #n=np.array(joint_effort)
+        # test.array= np.append(joint_effort)
+        # print(test.array.size)
+        # m=np.concatenate(n)
+        # df=pd.DataFrame(m)
+        # # print("X = {} Y= {} Z = {}".format(joint_effort[0],joint_effort[1],joint_effort[2]))
+        # # group_name = "panda_arm"
+        # df.head
         #move_group = self.move_group
-        move_group = moveit_commander.MoveGroupCommander(group_name)
-        wpose = move_group.get_current_pose().pose
-        waypoints = []
-        if joint_effort[0]>=3 or joint_effort[0]<=-2 or  joint_effort[1]>=2 or joint_effort[1]<=-2 or joint_effort[2]>=2 or joint_effort[2]<=-2 :
-            wpose.position.x +=joint_effort[0]  * 0.01 # moveup
-            wpose.position.y +=joint_effort[1]  * 0.01 # moveup
-            wpose.position.z +=joint_effort[2]  * 0.01 # moveup
-            waypoints.append(copy.deepcopy(wpose))
-            (plan, fraction) = move_group.compute_cartesian_path(waypoints, 0.01, 0.0 )  
-            # robot = self.robot
-            # display_trajectory_publisher = self.display_trajectory_publisher
-            # display_trajectory = moveit_msgs.msg.DisplayTrajectory()
-            # display_trajectory.trajectory_start = robot.get_current_state()
-            # display_trajectory.trajectory.append(plan)
-            # display_trajectory_publisher.publish(display_trajectory)
-            move_group.execute(plan, wait=False)
-        rospy.sleep(0.5)
+        
+        # if joint_effort[0]>=5 or joint_effort[0]<=-5 or  joint_effort[1]>=5 or joint_effort[1]<=-5 or joint_effort[2]>=5 or joint_effort[2]<=-5 :
+        #     move_group = moveit_commander.MoveGroupCommander(group_name)
+        #     wpose = move_group.get_current_pose(self.eef_link)
+        #     #waypoints = []
+        #     print("X = {} Y= {} Z = {}".format(joint_effort[0],joint_effort[1],joint_effort[2]))
+        #     # wpose.position.x +=joint_effort[0]  * 0.01 # moveup
+        #     # waypoints.append(copy.deepcopy(wpose))
+        #     wpose.pose.position.y +=joint_effort[1]  * 0.01 # moveup
+        #     move_group.go(wpose)
+        #     #waypoints.append(copy.deepcopy(wpose))
+        #     # wpose.position.z +=joint_effort[2]  * 0.01 # moveup
+        #     # waypoints.append(copy.deepcopy(wpose))
+        #     #(plan, fraction) = move_group.compute_cartesian_path(waypoints, 0.01, 0.0 )  
+        #     # robot = self.robot
+        #     # display_trajectory_publisher = self.display_trajectory_publisher
+        #     # display_trajectory = moveit_msgs.msg.DisplayTrajectory()
+        #     # display_trajectory.trajectory_start = robot.get_current_state()
+        #     # display_trajectory.trajectory.append(plan)
+        #     # display_trajectory_publisher.publish(display_trajectory)
+        #     #move_group.execute(plan, wait=False)
+        # #rospy.sleep(0.5)
 
         
         
         
         
-        # with open('/home/panda/ws_moveit/src/effort_data.csv', 'a+', encoding='UTF8') as f:
-        #         writer = csv.writer(f)
-        #         #write the data
-        #         writer.writerow(joint_effort)
-        #         #print("file should be saved") 
+        # # with open('/home/panda/ws_moveit/src/effort_data.csv', 'a+', encoding='UTF8') as f:
+        # #         writer = csv.writer(f)
+        # #         #write the data
+        # #         writer.writerow(joint_effort)
+        # #         #print("file should be saved") 
                     
-        #         f.close
+        # #         f.close
                 
 
-        #time.sleep(0.1)
+        # #time.sleep(0.1)
         return joint_effort
-    def animate(self,joint_effort):
+    def animate(self):
+        print(self.robot.get_current_state())
         #data = pd.DataFrame(joint_effort, columns = ['x','y','z','rx','ry','rz'])
-        #data = pd.read_csv('/home/panda/ws_moveit/src/effort_data.csv')
+        #data = pd.read_csv('/home/rehan/ws_moveit/src/effort_data.csv')
         #x = data['x_value']
-        data=joint_effort
-        y1 = data[0]
-        y2 = data[1]
-        y3 = data[2]
-        y4 = data[3]
-        y5 = data[4]
-        y6 = data[5]
-        # y7 = data['joint_effort[6]']
+        #data=joint_effort
+        # y1 = data[0]
+        # y2 = data[1]
+        # y3 = data[2]
+        # y4 = data[3]
+        # y5 = data[4]
+        # y6 = data[5]
+        # # y7 = data['joint_effort[6]']
         # y8 = data['joint_effort[7]']
         # y9 = data['joint_effort[8]']
-
-        plt.cla()
-
-        plt.plot(  y1, label='joint_effort[x]')
-        plt.plot(  y2, label='joint_effort[y]') 
-        plt.plot(  y3, label='joint_effort[z]')
-        plt.plot(  y4, label='joint_effort[RX]')
-        plt.plot(  y5, label='joint_effort[Ry]')
-        plt.plot(  y6, label='joint_effort[Rz]')
-        #plt.plot(  y7, label='joint_effort[6]')
-        #plt.plot(  y8, label='joint_effort[7]') 
-        #plt.plot(  y9, label='joint_effort[8]')
-        
-        plt.legend(loc='upper left')
-        plt.tight_layout()
+        #print("X = {} Y= {} Z = {}".format(y1,y2,y3))
+        move_group = moveit_commander.MoveGroupCommander("panda_arm")
+        pose=move_group.get_current_pose(self.eef_link)
+        print(pose)
+        pose.pose.position.x += 0.05
+        #move_group.set_pose_target(pose, self.eef_link)
+        move_group.go(pose)
+        move_group.clear_pose_target(self.eef_link)
+        # move_group.shift_pose_target( 1, 0.06, self.eef_link)
+        # move_group.go(pose)
+        rospy.spin() 
 
 
       
@@ -158,6 +177,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         group_name = "panda_arm"
         #move_group = self.move_group
         move_group = moveit_commander.MoveGroupCommander(group_name)
+        #w=move_group.get_current_effort()
         wpose = move_group.get_current_pose().pose
         waypoints = []
         wpose.position.z += scale * 0.01 # moveup
@@ -170,10 +190,10 @@ class MoveGroupPythonInterfaceTutorial(object):
         display_trajectory.trajectory.append(plan)
         display_trajectory_publisher.publish(display_trajectory)
         move_group.execute(plan, wait=True)
-
+        move_group.go()
 
     def listener(self):
-
+        global var
         # In ROS, nodes are uniquely named. If two nodes with the same
         # name are launched, the previous one is kicked off. The
         # anonymous=True flag means that rospy will choose a unique
@@ -183,9 +203,9 @@ class MoveGroupPythonInterfaceTutorial(object):
         #rospy.init_node('data_log', anonymous=True)
 
         rospy.Subscriber('/franka_state_controller/F_ext',WrenchStamped, test.callback)
-
+        
         # spin() simply keeps python from exiting until this node is stopped
-    
+        print(test.a)
         rospy.spin()
         
         
@@ -193,13 +213,15 @@ class MoveGroupPythonInterfaceTutorial(object):
 if __name__ == '__main__':
    
     test=MoveGroupPythonInterfaceTutorial()
-    rospy.Subscriber('/franka_state_controller/F_ext',WrenchStamped, test.callback)
+    #rospy.Subscriber('/franka_state_controller/F_ext',WrenchStamped, test.callback)
     #ani = FuncAnimation(plt.gcf(), test.animate(joint_effort), interval=1)
     #d=test.callback( )
-    print(joint_effort)
+    #print(joint_effort)
     # plt.tight_layout()
     # plt.show()
     #print(WrenchStamped.wrench.force.x)
-    rospy.spin()  
+    #test.animate()
+    test.listener()
+    #rospy.spin() 
 
     

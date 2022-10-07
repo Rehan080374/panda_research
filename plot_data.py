@@ -33,9 +33,9 @@ def animate(i):
     plt.plot(  y1, label='joint_effort[x]')
     plt.plot(  y2, label='joint_effort[y]') 
     plt.plot(  y3, label='joint_effort[z]')
-    plt.plot(  y4, label='joint_effort[RX]')
-    plt.plot(  y5, label='joint_effort[Ry]')
-    plt.plot(  y6, label='joint_effort[Rz]')
+    # plt.plot(  y4, label='joint_effort[RX]')
+    # plt.plot(  y5, label='joint_effort[Ry]')
+    # plt.plot(  y6, label='joint_effort[Rz]')
     #plt.plot(  y7, label='joint_effort[6]')
     #plt.plot(  y8, label='joint_effort[7]') 
     #plt.plot(  y9, label='joint_effort[8]')
@@ -44,7 +44,7 @@ def animate(i):
     plt.tight_layout()
 
 
-ani = FuncAnimation(plt.gcf(), animate, interval=1)
+ani = FuncAnimation(plt.gcf(), animate, interval=100)
 
 plt.tight_layout()
 plt.show()

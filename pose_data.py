@@ -33,7 +33,7 @@ def callback(data):
             f.close
             
 
-    #time.sleep(0.1)
+    time.sleep(1)
     
     
 
