@@ -1,4 +1,5 @@
 
+
 from turtle import shape
 import numpy as np
 import copy
@@ -8,10 +9,19 @@ import moveit_commander
 import moveit_msgs.msg
 from time import sleep
 import rospy
+import actionlib
 from geometry_msgs.msg import WrenchStamped
-#from franka_msgs.msg import Wrench
+from franka_gripper.msg import GraspAction, GraspGoal,MoveAction,MoveGoal
+from franka_msgs.msg import ErrorRecoveryActionGoal,ErrorRecoveryActionFeedback
+from evdev import InputDevice, categorize, ecodes,KeyEvent
+from pynput import keyboard
 
-joint_effort=[]
+from rospy.service import rospyerr
+
+#from franka_msgs.msg import Wrench
+opened=[0.037,0.037]
+closed=[0.0,0.0]
+
 class MoveGroupPythonInterfaceTutorial(object):
     """MoveGroupPythonInterfaceTutorial"""
 
@@ -60,7 +70,13 @@ class MoveGroupPythonInterfaceTutorial(object):
         self.joint_effort=np.array(joint_effort)
         self.data.append(self.joint_effort)
 
+    def talker(self):
         
+        for i in range (0,5):
+            pub = rospy.Publisher('/franka_control/error_recovery/goal',ErrorRecoveryActionGoal, queue_size=10)
+            str = ErrorRecoveryActionGoal()
+            str.goal={}
+            pub.publish(str)   
         
   
 
@@ -80,19 +96,66 @@ class MoveGroupPythonInterfaceTutorial(object):
         elif string=='z':
             print("z-motion")
             wpose.position.z += scale * 0.01 # moveup 
-        if string=='rx':
+        elif string=='rx':
+            
             print("rx-motion")
-            rot[0]+= scale * 0.01 # moveup
+            if scale>=0:
+                rot[0] +=  0.05 # moveup
+            else:
+                rot[0] -=  0.05 # moveup    
+            r=self.get_quaternion_from_euler(rot[0], rot[1], rot[2])
+            wpose.orientation.x = r[0]
+            wpose.orientation.y = r[1]
+            wpose.orientation.z = r[2]
+            wpose.orientation.w = r[3]
         elif string=='ry':
             print("ry-motion")
-            rot[1] += scale * 0.01 # moveup
+            if scale>=0:
+                rot[1] +=  0.05 # moveup
+            else:
+                rot[1] -=  0.05 # moveup 
+            r=self.get_quaternion_from_euler(rot[0], rot[1], rot[2])
+            wpose.orientation.x = r[0]
+            wpose.orientation.y = r[1]
+            wpose.orientation.z = r[2]
+            wpose.orientation.w = r[3]
         elif string=='rz':
             print("rz-motion")
-            rot[2] += scale * 0.01 # moveup   
-        goal=(wpose.position.x ,wpose.position.y ,wpose.position.z, rot[0],rot[1],rot[2])     
-        print(goal)  
-        move_group.go(goal)
-
+            if scale>=0:
+                rot[2] +=  0.1 # moveup
+            else:
+                rot[2] -=  0.1 # moveup 
+            r=self.get_quaternion_from_euler(rot[0], rot[1], rot[2])
+            wpose.orientation.x = r[0]
+            wpose.orientation.y = r[1]
+            wpose.orientation.z = r[2]
+            wpose.orientation.w = r[3]  
+        #goal=(wpose.position.x ,wpose.position.y ,wpose.position.z, rot[0],rot[1],rot[2])     
+        #print(goal)  
+        #move_group.set_pose_target(wpose)
+        success=move_group.go(wpose)
+        if success==False:
+            print("error during execution. starting recovery")
+            self.talker()
+            
+    def get_quaternion_from_euler(self,roll, pitch, yaw):
+        """
+        Convert an Euler angle to a quaternion.
+        
+        Input
+            :param roll: The roll (rotation around x-axis) angle in radians.
+            :param pitch: The pitch (rotation around y-axis) angle in radians.
+            :param yaw: The yaw (rotation around z-axis) angle in radians.
+        
+        Output
+            :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
+        """
+        qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+        qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
+        qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
+        qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+ 
+        return [qx, qy, qz, qw]
     def listener(self):
         # global var
         # In ROS, nodes are uniquely named. If two nodes with the same
@@ -107,42 +170,78 @@ class MoveGroupPythonInterfaceTutorial(object):
         
         # spin() simply keeps python from exiting until this node is stopped
         # print(test.a)
+    def grasp_client(self,string):
+	
         
+        if string=='op':
+            group_name = "hand"
+            move_group = moveit_commander.MoveGroupCommander(group_name)
+            joint_goal = move_group.get_current_joint_values()
+            joint_goal[0] = opened[0]
+            joint_goal[1] = opened[1]
+            move_group.go(joint_goal, wait=True)
+            move_group.stop()
+           
+        elif string =='cl':
+            client = actionlib.SimpleActionClient('franka_gripper/grasp',GraspAction)
+            print('waiting for the action server to start')
+            timeout=rospy.Duration(5)
+            client.wait_for_server(timeout)
+            #goal= MoveGoal()
+        
+            goal = GraspGoal()
+            
+            goal.force = 70
+            goal.epsilon.inner = 0.05
+            goal.epsilon.outer = 0.0510
+
+            goal.speed = 0.1
+            goal.width = 0.04
+            
+            client.send_goal(goal)
+            wait = client.wait_for_result(timeout)
+        
+            if not wait:
+                rospy.logerr("Action server not available!")
+                rospy.signal_shutdown("Action server not available!")
+            else:
+                return client.get_result()
+               
         
 
 if __name__ == '__main__':
    
     test=MoveGroupPythonInterfaceTutorial()
-    #rospy.Subscriber('/franka_state_controller/F_ext',WrenchStamped, test.callback)
-    #ani = FuncAnimation(plt.gcf(), test.animate(joint_effort), interval=1)
-    #d=test.callback( )
-    #print(joint_effort)
-    # plt.tight_layout()
-    # plt.show()
-    #print(WrenchStamped.wrench.force.x)
-    #test.animate()
+    
     test.listener()
     #rospy.;spin() 
+    x= input("c to close gripper and f to open gripper")
+    if x == 'f' or x == 'F':
+                test.grasp_client('op')
+    elif x == 'c' or x == 'C':
+                test.grasp_client('cl')    
     while 1:
+        
         #d=np.array(test.data)
         m=np.mean(test.data,axis=0) 
-        #print("X mean = {} Y mean = {} Z mean = {}".format(m[0],m[1],m[2]))
-        if m.size>5:
          #print("X mean = {} Y mean = {} Z mean = {}".format(m[0],m[1],m[2]))
-            if abs(test.joint_effort[0]-m[0])>1:
+        if m.size>5:
+            # x=sys.stdin.read(1)[0]    
+            # print("You pressed", x)
+         #print("X mean = {} Y mean = {} Z mean = {}".format(m[0],m[1],m[2]))
+            if abs(test.joint_effort[0]-m[0])>2:
               test.move(test.joint_effort[0],'x')
-            if abs(test.joint_effort[1]-m[1])>1:
+            if abs(test.joint_effort[1]-m[1])>2:
               test.move(test.joint_effort[1],'y') 
-            if abs(test.joint_effort[2]-m[2])>1:
+            if abs(test.joint_effort[2]-m[2])>2:
               test.move(test.joint_effort[2],'z') 
-            if abs(test.joint_effort[3]-m[3])>1:
+            elif abs(test.joint_effort[3]-m[3])>1:
               test.move(test.joint_effort[3],'rx')
-            if abs(test.joint_effort[4]-m[4])>1:
+            elif abs(test.joint_effort[4]-m[4])>1:
               test.move(test.joint_effort[4],'ry') 
-            if abs(test.joint_effort[5]-m[5])>1:
-              test.move(test.joint_effort[5],'rz')          
-        sleep(0.3)
-        # x,y,z,rx,ry,rz
-        # print(x,y,z)
-
+            elif abs(test.joint_effort[5]-m[5])>1:
+              test.move(test.joint_effort[5],'rz') 
+            
+                        
+                        
     

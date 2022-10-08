@@ -45,7 +45,6 @@
 
 from __future__ import print_function
 from ast import While
-from ctypes.wintypes import PCHAR
 from email import header
 import imp
 from ossaudiodev import control_names
@@ -112,22 +111,16 @@ pickfinal=[-0.4247359809465052, 0.6665463957323442, -0.4483102312596579, -2.1069
 placefinal=[0.5487171375406416, 0.9412344858018973, 0.6022579212439687, -1.657488863038272, -0.7617680575053261, 2.375601856496599, 2.3530502091860024,]
 opened=[0.037,0.037]
 closed=[0.0,0.0]
-pc_r="/home/panda/ws_moveit/src/joint_angles.csv"
-pc_w="/home/panda/ws_moveit/src/joint_angles1.csv"
-laptop_r='/home/rehan/ws_moveit/src/joint_angles.csv'
-laptop_w='/home/rehan/ws_moveit/src/joint_angles1.csv'
-file_read=laptop_r
-file_write=laptop_w
 
 pick=[0.3330900495280648,-0.4473527946126987,0.09144908081004947,0.9160861559973409,-0.40053923792457446,0.007851307718949254,0.01711229499275589]
-with open(file_read, 'w', encoding='UTF8') as f:
+with open('/home/panda/ws_moveit/src/joint_angles.csv', 'w', encoding='UTF8') as f:
             writer= csv.writer(f)
             header=('joint_goal[0]','joint_goal[1]','joint_goal[2]','joint_goal[3]','joint_goal[4]','joint_goal[5]','joint_goal[6]','joint_goal[7]','joint_goal[8]')
             #header=['position.x','position.y','position.z','orientation.x','orientation.y','orientation.z','orientation.w','gripper_pose']
             #write the header
             writer.writerow(header)
             f.close()
-with open(file_write, 'w', encoding='UTF8') as o:
+with open('/home/panda/ws_moveit/src/joint_angles1.csv', 'w', encoding='UTF8') as o:
             write= csv.writer(o)
             header=('joint_goal[0]','joint_goal[1]','joint_goal[2]','joint_goal[3]','joint_goal[4]','joint_goal[5]','joint_goal[6]','joint_goal[7]','joint_goal[8]')
             #header=['position.x','position.y','position.z','orientation.x','orientation.y','orientation.z','orientation.w','gripper_pose']
@@ -407,7 +400,7 @@ class MoveGroupPythonInterfaceTutorial(object):
                     p='closed'
                 else:
                     p='opened'    
-                d1= pd.read_csv(file_read)
+                d1= pd.read_csv('/home/panda/ws_moveit/src/joint_angles.csv')
                 print(d1)
                 print ("number of rows in file are ==" ,len(d1))
                 #print("if the data looks good press X to execute ")
@@ -440,7 +433,7 @@ class MoveGroupPythonInterfaceTutorial(object):
                         p='closed'
                     else:
                         p='opened'    
-                    d= pd.read_csv(file_write)
+                    d= pd.read_csv('/home/panda/ws_moveit/src/moveit_tutorials/data/joint_angles1.csv')
                     print(d)
                     print ("number of rows in file are ==" ,len(d))
                     n=input("if the data looks good press Y to execute ")
@@ -472,7 +465,7 @@ class MoveGroupPythonInterfaceTutorial(object):
                         p='closed'
                     else:
                         p='opened'    
-                    d1= pd.read_csv(file_read)
+                    d1= pd.read_csv('/home/panda/ws_moveit/src/joint_angles.csv')
                     print(d1)
                     print ("number of rows in file are ==" ,len(d1))
                     n=input("if the data looks good press Y to execute ")
@@ -513,7 +506,7 @@ class MoveGroupPythonInterfaceTutorial(object):
             print("pose =",joint_goal)
             #data= pd.read_csv('/home/panda/ws_moveit/src/joint_angles.csv')
             
-            with open(file_write, 'a+', encoding='UTF8') as f:
+            with open('/home/panda/ws_moveit/src/joint_angles1.csv', 'a+', encoding='UTF8') as f:
                 writer = csv.writer(f)
                 # write the data
                 writer.writerow(joint_goal)
@@ -537,7 +530,7 @@ class MoveGroupPythonInterfaceTutorial(object):
             print("pose =",joint_goal)
             #data= pd.read_csv('/home/panda/ws_moveit/src/joint_angles.csv')
             
-            with open(file_read, 'a+', encoding='UTF8') as f:
+            with open('/home/panda/ws_moveit/src/joint_angles.csv', 'a+', encoding='UTF8') as f:
                 writer = csv.writer(f)
                 # write the data
                 writer.writerow(joint_goal)
@@ -1076,6 +1069,7 @@ def main():
             "use 'f' to open gripper \n"
             "use 'c' to close gripper\n" 
             "use 'h' to go to home pose\n"
+            "use 'v' for error recovery\n"
             "use 'k' to execute poses from file\n"
             "use 'j' to go to save current pose\n"
             "use 'r' exit tutorial \n")
@@ -1098,7 +1092,7 @@ def main():
                 tutorial.write_file()
                 print("backward")
             elif event1 == 'k' or event1 == 'K':
-                tutorial.read_file('')
+                tutorial.read_file()
                 
             
             elif event1 == 'j' or event1 == 'J':
@@ -1144,11 +1138,14 @@ def main():
                 
                                
                 
+            elif event1 == 'v' or event1 == 'V':
+                print ("error recovery started wait 3 sec")
+                
+                tutorial.talker()
+            
             elif event1 == 'n' or event1 == 'N':
                 print ("data collection activated rotation")
-                tutorial.data(speed,'a')
-            
-                      
+                tutorial.data(speed,'a')         
             elif event1 == 'o'or event1 == 'O':
                 print ("right rotation ")
                 #tutorial.check_hand_pose()
