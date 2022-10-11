@@ -47,10 +47,10 @@ from __future__ import print_function
 from ast import While
 from ctypes.wintypes import PCHAR
 from email import header
-import imp
+
 from ossaudiodev import control_names
 from pickle import TRUE
-from socket import timeout
+#from socket import timeout
 #from six.moves import input
 from evdev import InputDevice, categorize, ecodes,KeyEvent
 
@@ -102,8 +102,8 @@ pc_r="/home/panda/ws_moveit/src/joint_angles.csv"
 pc_w="/home/panda/ws_moveit/src/joint_angles1.csv"
 laptop_r='/home/rehan/ws_moveit/src/joint_angles.csv'
 laptop_w='/home/rehan/ws_moveit/src/joint_angles1.csv'
-file_read=laptop_r
-file_write=laptop_w
+file_read=pc_r
+file_write=pc_w
 
 
 
@@ -311,6 +311,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         joint_goal[4] = array[4]
         joint_goal[5] = array[5] 
         joint_goal[6] = array[6]
+
         #if string =='op' :
         # joint_goal[7] = opened[0]
          #joint_goal[8] = opened[1]
@@ -560,11 +561,11 @@ class MoveGroupPythonInterfaceTutorial(object):
         move_group.execute(plan, wait=True)
     def talker(self):
         
-
-        pub = rospy.Publisher('/franka_control/error_recovery/goal',ErrorRecoveryActionGoal, queue_size=10)
-        str = ErrorRecoveryActionGoal()
-        str.goal={}
-        pub.publish(str)
+        for i in range (0,3):
+            pub = rospy.Publisher('/franka_control/error_recovery/goal',ErrorRecoveryActionGoal, queue_size=10)
+            str = ErrorRecoveryActionGoal()
+            str.goal={}
+            pub.publish(str)
         #rospy.wait_for_message('/franka_control/error_recovery/feedback',ErrorRecoveryActionFeedback)
             
 
@@ -1128,7 +1129,10 @@ def main():
                     rospy.sleep(5)
                     tutorial.gripper_control('sub')
                     rospy.sleep(5)
-                     
+            elif event1 == 'v' or event1 == 'V':
+                print ("error recovery started wait 3 sec")
+                
+                tutorial.talker()        
                             
                 
                                

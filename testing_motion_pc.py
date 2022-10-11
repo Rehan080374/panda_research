@@ -90,22 +90,33 @@ class MoveGroupPythonInterfaceTutorial(object):
         move_group = self.move_group
         rot=move_group.get_current_rpy(end_effector_link=self.eef_link)
         wpose = move_group.get_current_pose().pose
-        if string=='x':
+        if string=='xyz':
+            print("xyz-motion")
+            wpose.position.x -= scale[0] * 0.01 # moveup
+            wpose.position.y += scale[1] * 0.01 
+            wpose.position.z += scale[2]* 0.01
+        elif string=='x':
             print("x-motion")
-            wpose.position.x -= scale * 0.01 # moveup
+            wpose.position.x -= scale[0] * 0.01 # moveup
         elif string=='y':
             print("y-motion")
-            wpose.position.y += scale * 0.01 # moveup
+            wpose.position.y += scale[1] * 0.01 # moveup
         elif string=='z':
             print("z-motion")
-            wpose.position.z += scale * 0.01 # moveup 
+            wpose.position.z += scale[2] * 0.01 # moveup 
+        if string=='rxyz':
+            rot[0] -=  scale[3]*0.1 # moveup
+            rot[1] +=  scale[4]*0.1 # moveup  
+            rot[2] +=  scale[5]*0.1 # moveup    
+            print("rxyz-motion")  
+            r=self.get_quaternion_from_euler(rot[0], rot[1], rot[2])
+            wpose.orientation.x = r[0]
+            wpose.orientation.y = r[1]
+            wpose.orientation.z = r[2]
+            wpose.orientation.w = r[3] 
         elif string=='rx':
-            
             print("rx-motion")
-            if scale>=0:
-                rot[0] +=  0.05 # moveup
-            else:
-                rot[0] -=  0.05 # moveup    
+            rot[0] -=  scale[3]*0.1 # moveup          
             r=self.get_quaternion_from_euler(rot[0], rot[1], rot[2])
             wpose.orientation.x = r[0]
             wpose.orientation.y = r[1]
@@ -113,10 +124,7 @@ class MoveGroupPythonInterfaceTutorial(object):
             wpose.orientation.w = r[3]
         elif string=='ry':
             print("ry-motion")
-            if scale>=0:
-                rot[1] +=  0.05 # moveup
-            else:
-                rot[1] -=  0.05 # moveup 
+            rot[1] +=  scale[4]*0.1 # moveup  
             r=self.get_quaternion_from_euler(rot[0], rot[1], rot[2])
             wpose.orientation.x = r[0]
             wpose.orientation.y = r[1]
@@ -124,10 +132,7 @@ class MoveGroupPythonInterfaceTutorial(object):
             wpose.orientation.w = r[3]
         elif string=='rz':
             print("rz-motion")
-            if scale>=0:
-                rot[2] +=  0.1 # moveup
-            else:
-                rot[2] -=  0.1 # moveup 
+            rot[2] +=  scale[5]*0.1 # moveup
             r=self.get_quaternion_from_euler(rot[0], rot[1], rot[2])
             wpose.orientation.x = r[0]
             wpose.orientation.y = r[1]
@@ -231,19 +236,23 @@ if __name__ == '__main__':
         if m.size>5:
             # x=sys.stdin.read(1)[0]    
             # print("You pressed", x)
-         #print("X mean = {} Y mean = {} Z mean = {}".format(m[0],m[1],m[2]))
-            if abs(test.joint_effort[0]-m[0])>2:
-              test.move(test.joint_effort[0],'x')
-            if abs(test.joint_effort[1]-m[1])>2:
-              test.move(test.joint_effort[1],'y') 
-            if abs(test.joint_effort[2]-m[2])>2:
-              test.move(test.joint_effort[2],'z') 
-            elif abs(test.joint_effort[3]-m[3])>1:
-              test.move(test.joint_effort[3],'rx')
+        #  #print("X mean = {} Y mean = {} Z mean = {}".format(m[0],m[1],m[2]))
+            if abs(test.joint_effort[0]-m[0])>2 and abs(test.joint_effort[1]-m[1])>2 and abs(test.joint_effort[2]-m[2])>2:
+                test.move(test.joint_effort,'xyz')
+            elif abs(test.joint_effort[0]-m[0])>2:
+              test.move(test.joint_effort,'x')
+            elif abs(test.joint_effort[1]-m[1])>2:
+              test.move(test.joint_effort,'y') 
+            elif abs(test.joint_effort[2]-m[2])>2:
+              test.move(test.joint_effort,'z') 
+            if abs(test.joint_effort[3]-m[3])>1 and abs(test.joint_effort[4]-m[4])>1 and abs(test.joint_effort[5]-m[5])>1:
+              test.move(test.joint_effort,'rxyz')
+            elif abs(test.joint_effort[3]-m[3])>1: 
+              test.move(test.joint_effort,'rx')
             elif abs(test.joint_effort[4]-m[4])>1:
-              test.move(test.joint_effort[4],'ry') 
+               test.move(test.joint_effort,'ry') 
             elif abs(test.joint_effort[5]-m[5])>1:
-              test.move(test.joint_effort[5],'rz') 
+              test.move(test.joint_effort,'rz') 
             
                         
                         
