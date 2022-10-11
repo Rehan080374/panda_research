@@ -90,16 +90,27 @@ except:  # For Python 2 compatibility
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 
-
+## END_SUB_TUTORIAL
+# opening the file in read mode
+#my_file = open("/home/panda/ws_moveit/src/moveit_tutorials/doc/move_group_python_interface/scripts/joint_angles.txt", "r")
+  
+# reading the file
+#data = my_file.read()
+  
+# replacing end of line('/n') with ' ' and
+# splitting the text it further when '.' is seen.
+#data_into_list = data.replace('\n', ' ').split(" ")
+#str_list = [l.split('\n') for l in data.split(',')]
+  
+# printing the data
+#print(str_list)
+#my_file.close()
 home=[0.010634786303106106, -0.7793822895183896, -0.010644634918499455, -2.4004822612227055, 0.027908380891381375, 1.6902482674546058, 0.7998376508951186]
 pickup1=[-0.2679131060033514, 0.5198334925969442, -0.6354759461754247, -2.1510822642476994, 0.504498906923665, 2.554901361499585, -0.45090570525491397]
 pickfinal=[-0.4247359809465052, 0.6665463957323442, -0.4483102312596579, -2.1069096967797534, 0.536215686730907, 2.6785662354893156, -0.43715002890593474]
 placefinal=[0.5487171375406416, 0.9412344858018973, 0.6022579212439687, -1.657488863038272, -0.7617680575053261, 2.375601856496599, 2.3530502091860024,]
 opened=[0.037,0.037]
 closed=[0.0,0.0]
-
-
-
 
 pick=[0.3330900495280648,-0.4473527946126987,0.09144908081004947,0.9160861559973409,-0.40053923792457446,0.007851307718949254,0.01711229499275589]
 with open('/home/panda/ws_moveit/src/joint_angles.csv', 'w', encoding='UTF8') as f:
