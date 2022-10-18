@@ -1166,8 +1166,7 @@ def main():
                 #tutorial.gripper_control('op')
                 #tutorial.check_hand_pose()
             
-            elif event1 == 'm' or event1 == 'M':
-                tutorial.talker()
+            
                 
             
             elif event1 == 'c' or event1 == 'C':
