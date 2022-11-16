@@ -105,11 +105,12 @@ from moveit_commander.conversions import pose_to_list
 # printing the data
 #print(str_list)
 #my_file.close()
-home=[0.010634786303106106, -0.7793822895183896, -0.010644634918499455, -2.4004822612227055, 0.027908380891381375, 1.6902482674546058, 0.7998376508951186]
+home=[0, -0.78539816339744830962, 0, -3 * 0.78539816339744830962, 0, 1.57079632679489661923, 0.78539816339744830962]
+#home=[0.010634786303106106, -0.7793822895183896, -0.010644634918499455, -2.4004822612227055, 0.027908380891381375, 1.6902482674546058, 0.7998376508951186]
 pickup1=[-0.2679131060033514, 0.5198334925969442, -0.6354759461754247, -2.1510822642476994, 0.504498906923665, 2.554901361499585, -0.45090570525491397]
 pickfinal=[-0.4247359809465052, 0.6665463957323442, -0.4483102312596579, -2.1069096967797534, 0.536215686730907, 2.6785662354893156, -0.43715002890593474]
 placefinal=[0.5487171375406416, 0.9412344858018973, 0.6022579212439687, -1.657488863038272, -0.7617680575053261, 2.375601856496599, 2.3530502091860024,]
-opened=[0.037,0.037]
+opened=[0.035,0.035]
 closed=[0.0,0.0]
 
 pick=[0.3330900495280648,-0.4473527946126987,0.09144908081004947,0.9160861559973409,-0.40053923792457446,0.007851307718949254,0.01711229499275589]
@@ -238,8 +239,8 @@ class MoveGroupPythonInterfaceTutorial(object):
             group_name = "hand"
             move_group = moveit_commander.MoveGroupCommander(group_name)
             joint_goal = move_group.get_current_joint_values()
-            joint_goal[0] = opened[0]
-            joint_goal[1] = opened[1]
+            joint_goal[0] = 0.035
+            #joint_goal[1] = opened[1]
             move_group.go(joint_goal, wait=True)
             move_group.stop()
             #client = actionlib.SimpleActionClient('franka_gripper/grasp',MoveAction)
@@ -433,7 +434,7 @@ class MoveGroupPythonInterfaceTutorial(object):
                         p='closed'
                     else:
                         p='opened'    
-                    d= pd.read_csv('/home/panda/ws_moveit/src/moveit_tutorials/data/joint_angles1.csv')
+                    d= pd.read_csv('/home/panda/ws_moveit/src/joint_angles1.csv')
                     print(d)
                     print ("number of rows in file are ==" ,len(d))
                     n=input("if the data looks good press Y to execute ")
@@ -497,7 +498,7 @@ class MoveGroupPythonInterfaceTutorial(object):
 
             move_group = moveit_commander.MoveGroupCommander("hand")
             gripper_pose = move_group.get_current_joint_values()
-            if gripper_pose[0]<=0.02:
+            if gripper_pose[0]<=0.03:
                 joint_goal.append("close")
             else:
                 joint_goal.append("open")
@@ -521,7 +522,7 @@ class MoveGroupPythonInterfaceTutorial(object):
 
             move_group = moveit_commander.MoveGroupCommander("hand")
             gripper_pose = move_group.get_current_joint_values()
-            if gripper_pose[0]<=0.02:
+            if gripper_pose[0]<=0.03:
                 joint_goal.append("close")
             else:
                 joint_goal.append("open")
@@ -1092,7 +1093,7 @@ def main():
                 tutorial.write_file()
                 print("backward")
             elif event1 == 'k' or event1 == 'K':
-                tutorial.read_file()
+                tutorial.read_file('')
                 
             
             elif event1 == 'j' or event1 == 'J':
