@@ -105,6 +105,8 @@ from moveit_commander.conversions import pose_to_list
 # printing the data
 #print(str_list)
 #my_file.close()
+gamepad_input ='/dev/input/event5'
+
 home=[0, -0.78539816339744830962, 0, -3 * 0.78539816339744830962, 0, 1.57079632679489661923, 0.78539816339744830962]
 #home=[0.010634786303106106, -0.7793822895183896, -0.010644634918499455, -2.4004822612227055, 0.027908380891381375, 1.6902482674546058, 0.7998376508951186]
 pickup1=[-0.2679131060033514, 0.5198334925969442, -0.6354759461754247, -2.1510822642476994, 0.504498906923665, 2.554901361499585, -0.45090570525491397]
@@ -269,8 +271,8 @@ class MoveGroupPythonInterfaceTutorial(object):
             #goal.width = 0.058
             #goal.speed = 0.03
             goal.force = 70
-            goal.epsilon.inner = 0.05
-            goal.epsilon.outer = 0.0510
+            goal.epsilon.inner = 0.035
+            goal.epsilon.outer = 0.0410
 
             goal.speed = 0.1
             goal.width = 0.04
@@ -401,7 +403,7 @@ class MoveGroupPythonInterfaceTutorial(object):
                     p='closed'
                 else:
                     p='opened'    
-                d1= pd.read_csv('/home/panda/ws_moveit/src/joint_angles.csv')
+                d1= pd.read_csv('/home/panda/ws_moveit/src/joint_angles1.csv')
                 print(d1)
                 print ("number of rows in file are ==" ,len(d1))
                 #print("if the data looks good press X to execute ")
@@ -598,31 +600,50 @@ class MoveGroupPythonInterfaceTutorial(object):
          joint_goal[0] = closed[0]
          joint_goal[1] = closed[1]
         elif string == 'add' :
+         print("joint[6] clockwise motion ")
          joint_goal[6] = joint_goal[6]+0.5
          move_group.go(joint_goal, wait=True)
          
         elif string == 'sub' :
+         print("joint[6] counterclockwise motion ")   
          joint_goal[6] = joint_goal[6]-0.5
          move_group.go(joint_goal, wait=True)
+
+
+
         elif string == 'add1' :
+         print("joint[5] clockwise motion ")   
          joint_goal[5] = joint_goal[5]+0.1
          move_group.go(joint_goal, wait=True)
          
         elif string == 'sub1' :
+         print("joint[5] counterclockwise motion ")  
          joint_goal[5] = joint_goal[5]-0.1
          move_group.go(joint_goal, wait=True) 
+
+
+
+
         elif string == 'add2' :
+         print("joint[4] clockwise motion ")   
          joint_goal[4] = joint_goal[4]+0.1
          move_group.go(joint_goal, wait=True)
          
         elif string == 'sub2' :
+         print("joint[4] counterclockwise motion ")   
          joint_goal[4] = joint_goal[4]-0.1
-         move_group.go(joint_goal, wait=True)  
+         move_group.go(joint_goal, wait=True) 
+
+
+
+
         elif string == 'add3' :
+         print("joint[3] clockwise motion ")   
          joint_goal[3] = joint_goal[3]+0.1
          move_group.go(joint_goal, wait=True)
          
         elif string == 'sub3' :
+         print("joint[3] counterclockwise motion ")   
          joint_goal[3] = joint_goal[3]-0.1
          move_group.go(joint_goal, wait=True)  
         
@@ -1191,7 +1212,7 @@ def main():
             else:
                 print("stop")
     elif i == '2':
-        gamepad = InputDevice('/dev/input/event17')
+        gamepad = InputDevice(gamepad_input)
         print("joystick control started\n")
         for event in gamepad.read_loop():
             print("enter the direction with left joystck\n"  
@@ -1209,31 +1230,37 @@ def main():
                 keyevent = categorize(event)
                 #print (categorize(event))
                 if keyevent.keystate == KeyEvent.key_down:
-                    if keyevent.keycode == ['BTN_A', 'BTN_GAMEPAD', 'BTN_SOUTH']:
+                    if keyevent.keycode == 'BTN_MODE':
+                        print ("saving joint states") 
+                        tutorial.write_file('j') 
+                    elif keyevent.keycode == ['BTN_A', 'BTN_GAMEPAD', 'BTN_SOUTH']:
                         print ("A")
                         tutorial.grasp_client('op')
-                        tutorial.write_file()
+                        
                     elif keyevent.keycode == ['BTN_WEST', 'BTN_Y']:
                         print ("Y")
                         tutorial.go_to_joint_state(home)
-                        tutorial.write_file()
+                        
                         print("Home")
                     elif keyevent.keycode == ['BTN_B', 'BTN_EAST']:
-                        print ("B")
+                        print ("gripper activated")
                         tutorial.grasp_client('cl')
-                        tutorial.write_file()
+                        
                     elif keyevent.keycode == ['BTN_NORTH', 'BTN_X']:
                         print ("X")
                         tutorial.read_file('j')
+                    elif keyevent.keycode == 'BTN_TL':
+                        print ("down") 
+                        tutorial.movedown(speed)
+                        tutorial.write_file()     
 
                     elif keyevent.keycode == 'BTN_TR':
                         print ("up")
                         tutorial.moveup(speed)
                         tutorial.write_file()
-                    elif keyevent.keycode == 'BTN_TL':
-                        print ("down") 
-                        tutorial.movedown(speed)
-                        tutorial.write_file() 
+                    
+                    
+                            
                     elif keyevent.keycode == 'BTN_START':
                         print ("error recovery started please wait 3 sec") 
                         tutorial.talker()
@@ -1283,36 +1310,36 @@ def main():
                 if ecodes.bytype[absevent.event.type][absevent.event.code] == 'ABS_RY':
                     
                     if absevent.event.value >= 32767 :
-                        print ('rotate up')
+                        print ('rotate down')
                         tutorial.gripper_control('sub1')
                         tutorial.write_file()
                         #print (absevent.event.value)
                     elif absevent.event.value <= -32768:
-                        print ('rotate down')
+                        print ('rotate up')
                         tutorial.gripper_control('add1')
                         tutorial.write_file()
                         #print (absevent.event.value)      
                 if ecodes.bytype[absevent.event.type][absevent.event.code] == 'ABS_HAT0X':
                     
                     if absevent.event.value > 0 :
-                        print ('rotate up')
+                        print ('rotate right')
                         tutorial.gripper_control('sub2')
                         tutorial.write_file()
                         #print (absevent.event.value)
                     elif absevent.event.value < 0:
-                        print ('rotate down')
+                        print ('rotate left')
                         tutorial.gripper_control('add2')
                         tutorial.write_file()
                         #print (absevent.event.value)  
                 if ecodes.bytype[absevent.event.type][absevent.event.code] == 'ABS_HAT0Y':
                     
                     if absevent.event.value > 0 :
-                        print ('rotate up')
+                        print ('rotate down')
                         tutorial.gripper_control('sub3')
                         tutorial.write_file()
                         #print (absevent.event.value)
                     elif absevent.event.value < 0:
-                        print ('rotate down')
+                        print ('rotate up')
                         tutorial.gripper_control('add3')
                         tutorial.write_file()
                         #print (absevent.event.value)              
