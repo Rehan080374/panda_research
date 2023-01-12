@@ -30,7 +30,6 @@ import os
 import configparser
 import sys
 import cv2
-import wget
 import mediapipe as mp
 
 
@@ -71,9 +70,9 @@ def main() :
             # Get a new frame from camera
             retval, frame = cap.read()
             # Extract left and right images from side-by-side
-            left_right_image = np.split(frame, 2, axis=1)
+            #left_right_image = np.split(frame, 2, axis=1)
            
-            image=left_right_image[0]
+            image=frame
             image.flags.writeable = False
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             results = hands.process(image)
@@ -87,7 +86,8 @@ def main() :
                 # i+=1
                 for hand_landmarks in results.multi_hand_landmarks:
                     mp_drawing.draw_landmarks(image,hand_landmarks,mp_hands.HAND_CONNECTIONS,mp_drawing_styles.get_default_hand_landmarks_style(),mp_drawing_styles.get_default_hand_connections_style())
-                   
+                    
+                    print(hand_landmarks)
                         
             # Flip the image horizontally for a selfie-view display.
             cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
