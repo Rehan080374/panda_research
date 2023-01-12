@@ -8,7 +8,9 @@ import moveit_commander
 import moveit_msgs.msg
 from time import sleep
 import rospy
-from geometry_msgs.msg import WrenchStamped
+from geometry_msgs.msg import Pose
+import actionlib
+from franka_gripper.msg import GraspAction, GraspGoal,MoveAction,MoveGoal
 #from franka_msgs.msg import Wrench
 
 joint_effort=[]
@@ -54,95 +56,112 @@ class MoveGroupPythonInterfaceTutorial(object):
     def callback(self,data):
         
         
-        
+        print(data)
        
-        joint_effort =[data.wrench.force.x,data.wrench.force.y,data.wrench.force.z,data.wrench.torque.x,data.wrench.torque.y,data.wrench.torque.z]
-        self.joint_effort=np.array(joint_effort)
-        self.data.append(self.joint_effort)
+        # joint_effort =[data.wrench.force.x,data.wrench.force.y,data.wrench.force.z,data.wrench.torque.x,data.wrench.torque.y,data.wrench.torque.z]
+        # self.joint_effort=np.array(joint_effort)
+        # self.data.append(self.joint_effort)
 
         
         
   
+    def grasp_client(self,string):
+	
+        
+        if string=='op':
+            group_name = "hand"
+            move_group = moveit_commander.MoveGroupCommander(group_name)
+            joint_goal = move_group.get_current_joint_values()
+            joint_goal[0] = 0.034
+            joint_goal[1] = 0.034
+
+            move_group.go(joint_goal, wait=True)
+            move_group.stop()
+            
+        elif string =='cl':
+            client = actionlib.SimpleActionClient('franka_gripper/grasp',GraspAction)
+            print('waiting for the action server to start')
+            timeout=rospy.Duration(5)
+            client.wait_for_server(timeout)
+            #goal= MoveGoal()
+        
+            goal = GraspGoal()
+            #print("goal ==",goal)
+            #goal.width = 0.058
+            #goal.speed = 0.03
+            goal.force = 70
+            goal.epsilon.inner = 0.05
+            goal.epsilon.outer = 0.0510
+
+            goal.speed = 0.1
+            goal.width = 0.04
+            #print("goal=",goal)
+            client.send_goal(goal)
+            wait = client.wait_for_result(timeout)
+        
+            if not wait:
+                rospy.logerr("Action server not available!")
+                rospy.signal_shutdown("Action server not available!")
+            else:
+                return client.get_result()
+            
 
       
             
-    def move(self,scale,string=''):
+    def move(self,scale):
         
         move_group = self.move_group
         rot=move_group.get_current_rpy(end_effector_link=self.eef_link)
         wpose = move_group.get_current_pose().pose
-        if string=='x':
-            print("x-motion")
-            wpose.position.x -= scale * 0.01 # moveup
-        elif string=='y':
-            print("y-motion")
-            wpose.position.y += scale * 0.01 # moveup
-        elif string=='z':
-            print("z-motion")
-            wpose.position.z += scale * 0.01 # moveup 
-        if string=='rx':
-            print("rx-motion")
-            rot[0]+= scale * 0.01 # moveup
-        elif string=='ry':
-            print("ry-motion")
-            rot[1] += scale * 0.01 # moveup
-        elif string=='rz':
-            print("rz-motion")
-            rot[2] += scale * 0.01 # moveup   
-        goal=(wpose.position.x ,wpose.position.y ,wpose.position.z, rot[0],rot[1],rot[2])     
-        print(goal)  
+        # if string=='x':
+        #     print("x-motion")
+        #     wpose.position.x -= scale * 0.01 # moveup
+        # elif string=='y':
+        #     print("y-motion")
+        #     wpose.position.y += scale * 0.01 # moveup
+        # elif string=='z':
+        #     print("z-motion")
+        #     wpose.position.z += scale * 0.01 # moveup 
+        # if string=='rx':
+        #     print("rx-motion")
+        #     rot[0]+= scale * 0.01 # moveup
+        # elif string=='ry':
+        #     print("ry-motion")
+        #     rot[1] += scale * 0.01 # moveup
+        # elif string=='rz':
+        #     print("rz-motion")
+        #     rot[2] += scale * 0.01 # moveup
+        # wpose.position.x += scale
+        wpose.position.y += scale
+        # wpose.position.z += scale
+        # wpose.orientation.x += scale
+        # wpose.orientation.y += scale
+        # wpose.orientation.z += scale
+        # wpose.orientation.w += scale
+
+        goal=(wpose)     
+         
         move_group.go(goal)
 
     def listener(self):
-        # global var
-        # In ROS, nodes are uniquely named. If two nodes with the same
-        # name are launched, the previous one is kicked off. The
-        # anonymous=True flag means that rospy will choose a unique
-        # name for our 'listener' node so that multiple listeners can
-        # run simultaneously.
+    
+        rospy.Subscriber('teleop_robot_goal_pose',Pose, self.callback)
         
-        #rospy.init_node('data_log', anonymous=True)
-
-        rospy.Subscriber('/franka_state_controller/F_ext',WrenchStamped, self.callback)
-        
-        # spin() simply keeps python from exiting until this node is stopped
-        # print(test.a)
         
         
 
 if __name__ == '__main__':
    
     test=MoveGroupPythonInterfaceTutorial()
-    #rospy.Subscriber('/franka_state_controller/F_ext',WrenchStamped, test.callback)
-    #ani = FuncAnimation(plt.gcf(), test.animate(joint_effort), interval=1)
-    #d=test.callback( )
-    #print(joint_effort)
-    # plt.tight_layout()
-    # plt.show()
-    #print(WrenchStamped.wrench.force.x)
-    #test.animate()
-    test.listener()
-    #rospy.;spin() 
-    while 1:
-        #d=np.array(test.data)
-        m=np.mean(test.data,axis=0) 
-        #print("X mean = {} Y mean = {} Z mean = {}".format(m[0],m[1],m[2]))
-        if m.size>5:
-         #print("X mean = {} Y mean = {} Z mean = {}".format(m[0],m[1],m[2]))
-            if abs(test.joint_effort[0]-m[0])>1:
-              test.move(test.joint_effort[0],'x')
-            if abs(test.joint_effort[1]-m[1])>1:
-              test.move(test.joint_effort[1],'y') 
-            if abs(test.joint_effort[2]-m[2])>1:
-              test.move(test.joint_effort[2],'z') 
-            if abs(test.joint_effort[3]-m[3])>1:
-              test.move(test.joint_effort[3],'rx')
-            if abs(test.joint_effort[4]-m[4])>1:
-              test.move(test.joint_effort[4],'ry') 
-            if abs(test.joint_effort[5]-m[5])>1:
-              test.move(test.joint_effort[5],'rz')          
-        sleep(0.3)
-        # x,y,z,rx,ry,rz
-        # print(x,y,z)
+   
+    test.move(0.2)
+    
+    test.move(-0.2)
+    
 
+    test.grasp_client('op')
+    sleep(5)
+    test.grasp_client('cl')
+    sleep(5)
+    
     
