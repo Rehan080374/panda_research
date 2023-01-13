@@ -32,7 +32,7 @@ import sys
 import cv2
 import wget
 import mediapipe as mp
-
+import pyzed.sl as sl
 
 def download_calibration_file(serial_number) :
     if os.name == 'nt' :
@@ -143,6 +143,8 @@ class Resolution :
     height = 720
 
 def main() :
+    
+
     serial_number = 19116715
     mp_drawing = mp.solutions.drawing_utils
     mp_drawing_styles = mp.solutions.drawing_styles
@@ -202,7 +204,12 @@ def main() :
                 i+=1
                 for hand_landmarks in results.multi_hand_landmarks:
                     mp_drawing.draw_landmarks(image,hand_landmarks,mp_hands.HAND_CONNECTIONS,mp_drawing_styles.get_default_hand_landmarks_style(),mp_drawing_styles.get_default_hand_connections_style())
-                   
+                    #print(f'Index finger tip coordinate: (',f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_size.width}, 'f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_size.height})')
+                    print(
+                            f'Index finger tip coordinate: (',
+                            f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_size.width}, '
+                            f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_size.height})'
+                        )
                         
             # Flip the image horizontally for a selfie-view display.
             cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
