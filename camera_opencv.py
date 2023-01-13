@@ -30,7 +30,6 @@ import os
 import configparser
 import sys
 import cv2
-import wget
 import mediapipe as mp
 
 
@@ -71,9 +70,9 @@ def main() :
             # Get a new frame from camera
             retval, frame = cap.read()
             # Extract left and right images from side-by-side
-            left_right_image = np.split(frame, 2, axis=1)
+            #left_right_image = np.split(frame, 2, axis=1)
            
-            image=left_right_image[0]
+            image=frame
             image.flags.writeable = False
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             results = hands.process(image)
