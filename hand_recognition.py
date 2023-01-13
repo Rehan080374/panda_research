@@ -149,6 +149,7 @@ def main() :
     mp_drawing = mp.solutions.drawing_utils
     mp_drawing_styles = mp.solutions.drawing_styles
     mp_hands = mp.solutions.hands
+    hands= mp_hands.Hands(model_complexity=0,min_detection_confidence=0.5,min_tracking_confidence=0.5)  
     # if len(sys.argv) == 1 :
     #     print('Please provide ZED serial number')
     #     exit(1)
@@ -171,53 +172,49 @@ def main() :
     if calibration_file  == "":
         exit(1)
     print("Calibration file found. Loading...")
-    i=0
+
     camera_matrix_left, camera_matrix_right, map_left_x, map_left_y, map_right_x, map_right_y = init_calibration(calibration_file, image_size)
-    with mp_hands.Hands(
-    model_complexity=0,
-    min_detection_confidence=0.5,
-    min_tracking_confidence=0.5) as hands:
+   
     
-        while cap.isOpened():
-            # Get a new frame from camera
-            retval, frame = cap.read()
-            # Extract left and right images from side-by-side
-            left_right_image = np.split(frame, 2, axis=1)
-            # Display images
-            #cv2.imshow("left RAW", left_right_image[0])
+    while cap.isOpened():
+        # Get a new frame from camera
+        retval, frame = cap.read()
+        # Extract left and right images from side-by-side
+        left_right_image = np.split(frame, 2, axis=1)
+        # Display images
+        #cv2.imshow("left RAW", left_right_image[0])
 
-            left_rect = cv2.remap(left_right_image[0], map_left_x, map_left_y, interpolation=cv2.INTER_LINEAR)
-            right_rect = cv2.remap(left_right_image[1], map_right_x, map_right_y, interpolation=cv2.INTER_LINEAR)
-             # To improve performance, optionally mark the image as not writeable to
-            # pass by reference.
-            image=left_rect
-            image.flags.writeable = False
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            results = hands.process(image)
+        left_rect = cv2.remap(left_right_image[0], map_left_x, map_left_y, interpolation=cv2.INTER_LINEAR)
+        right_rect = cv2.remap(left_right_image[1], map_right_x, map_right_y, interpolation=cv2.INTER_LINEAR)
+            # To improve performance, optionally mark the image as not writeable to
+        # pass by reference.
+        image=left_rect
+        image.flags.writeable = False
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        results = hands.process(image)
 
-            # Draw the hand annotations on the image.
-            image.flags.writeable = True
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            
-            if results.multi_hand_landmarks:
-                print(i)
-                i+=1
-                for hand_landmarks in results.multi_hand_landmarks:
-                    mp_drawing.draw_landmarks(image,hand_landmarks,mp_hands.HAND_CONNECTIONS,mp_drawing_styles.get_default_hand_landmarks_style(),mp_drawing_styles.get_default_hand_connections_style())
-                    #print(f'Index finger tip coordinate: (',f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_size.width}, 'f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_size.height})')
-                    print(
-                            f'Index finger tip coordinate: (',
-                            f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_size.width}, '
-                            f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_size.height})'
-                        )
-                        
-            # Flip the image horizontally for a selfie-view display.
-            cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
-            #cv2.imshow("left RECT", left_rect)
+        # Draw the hand annotations on the image.
+        image.flags.writeable = True
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        
+        if results.multi_hand_landmarks:
+           
+            for hand_landmarks in results.multi_hand_landmarks:
+                mp_drawing.draw_landmarks(image,hand_landmarks,mp_hands.HAND_CONNECTIONS,mp_drawing_styles.get_default_hand_landmarks_style(),mp_drawing_styles.get_default_hand_connections_style())
+                #print(f'Index finger tip coordinate: (',f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_size.width}, 'f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_size.height})')
+                print(
+                        f'Index finger tip coordinate: (',
+                        f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_size.width}, '
+                        f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_size.height})'
+                    )
+                    
+        # Flip the image horizontally for a selfie-view display.
+        cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
+        #cv2.imshow("left RECT", left_rect)
 
-            #cv2.imshow("right RECT", right_rect)
-            if cv2.waitKey(30) >= 0 :
-                break
+        #cv2.imshow("right RECT", right_rect)
+        if cv2.waitKey(30) >= 0 :
+            break
 
     exit(0)
 
