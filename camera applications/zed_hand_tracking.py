@@ -9,42 +9,45 @@ import pyzed.sl as sl
 import math
 import rospy
 from std_msgs.msg import Float32MultiArray
-
-class Data(object):
-    def __init__(self,point_cloud, pts):
-        self.current_points = pts
-        self.current_distance=[]
-        self.previous_distance=[]
-        self.point_cloud=point_cloud
-    def check_distance_array(self) :
-        distance_array = []
-        dist=0
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from geometry_msgs.msg import PoseStamped
+marker_pose = PoseStamped()
+# class Data(object):
+#     def __init__(self,point_cloud, pts):
+#         self.current_points = pts
+#         self.current_distance=[]
+#         self.previous_distance=[]
+#         self.point_cloud=point_cloud
+#     def check_distance_array(self) :
+#         distance_array = []
+#         dist=0
         
-        for i in range(0, len(self.current_points)):
-            neighbors=[]
+#         for i in range(0, len(self.current_points)):
+#             neighbors=[]
             
-            print(self.current_points[i])
-            x,y=self.current_points[i]
-            neighbors=[x,y]
-            neighbors.append([x-1,y-1],[x-1,y],[x-1,y+1],[x,y-1],[x,y+1],[x+1,y+1],[x+1,y],[x+1,y-1])
-            if neighbors.all()>=0 : 
-               for j in range(0,len(neighbors)):
-                        x,y=neighbors[j]
-                        err,point_cloud_value = self.point_cloud.get_value(x,y)
-                        dist = math.sqrt(point_cloud_value[0] * point_cloud_value[0] +
-                                                        point_cloud_value[1] * point_cloud_value[1] +
-                                                        point_cloud_value[2] * point_cloud_value[2])
-                        if not np.isnan(dist) and not np.isinf(dist) and dist>=0 :
+#             print(self.current_points[i])
+#             x,y=self.current_points[i]
+#             neighbors=[x,y]
+#             neighbors.append([x-1,y-1],[x-1,y],[x-1,y+1],[x,y-1],[x,y+1],[x+1,y+1],[x+1,y],[x+1,y-1])
+#             if neighbors.all()>=0 : 
+#                for j in range(0,len(neighbors)):
+#                         x,y=neighbors[j]
+#                         err,point_cloud_value = self.point_cloud.get_value(x,y)
+#                         dist = math.sqrt(point_cloud_value[0] * point_cloud_value[0] +
+#                                                         point_cloud_value[1] * point_cloud_value[1] +
+#                                                         point_cloud_value[2] * point_cloud_value[2])
+#                         if not np.isnan(dist) and not np.isinf(dist) and dist>=0 :
                             
-                            break
-                        else:  
-                            continue   
-            distance_array.append(dist)                 
-        return distance_array    
+#                             break
+#                         else:  
+#                             continue   
+#             distance_array.append(dist)                 
+#         return distance_array    
 
-    def minus(self, x):
-        self.n -= x
-        return self.n
+#     def minus(self, x):
+#         self.n -= x
+#         return self.n
 
         
         # self.number_subscriber = rospy.Subscriber("/number", Int64, self.callback_number)
@@ -59,14 +62,51 @@ class Data(object):
     #         self.counter = 0
     #         return True, "Counter has been successfully reset"
     #     return False, "Counter has not been reset"
-    #  
+start_x=0
+start_y=0
+start_z=0   
+def check_direction(distance) :
+
+    d_thumb=distance[4]-distance[0]
+    d_wrist=distance[4]-distance[1]
+    d_pinky=distance[4]-distance[2]
+    d_middl=distance[4]-distance[3]
+    if d_middl<0 and d_wrist>0:
+        print("up")
+    elif d_middl>0 and d_wrist<0:
+        print("down")
+    elif d_thumb<0 and d_pinky>0:
+        print("left")
+    elif d_thumb>0 and d_pinky<0:
+        print("right")
+    else:
+        print("stop")    
+    return 
+def check_angle(normal,r) :
+    r=r
+    phi=((math.pi/2)+normal[1])#*math.pi/180
+    theta=normal[2]#*math.pi/180
+    global start_x,start_y,start_z
+    x = r*math.sin(phi)*math.cos(theta)
+    y = r*math.sin(phi)*math.sin(theta)
+    z = r*math.cos(phi)
+    x_temp=x-start_x
+    y_temp=y-start_y
+    z_temp=z-start_z
+    print ("x ={},y ={},z={}".format(x,y,z))
+    start_x=x
+    start_y=y
+    start_z=z
+    # print ("temp_x ={},temp_y ={},temp_z={}".format(x_temp,y_temp,z_temp))
+    
+        
 def check_distance(point_cloud,x,y) :
     err,point_cloud_value = point_cloud.get_value(x, y)
     
     distance = math.sqrt(point_cloud_value[0] * point_cloud_value[0] +
                                     point_cloud_value[1] * point_cloud_value[1] +
                                     point_cloud_value[2] * point_cloud_value[2])
-    return distance,point_cloud_value
+    return distance
 def check_depth(depth,points_array) :
     d_array = []
     dist=0
@@ -140,7 +180,7 @@ def main():
     init_params.camera_fps = 30  # Set fps at 30
     init_params.depth_mode = sl.DEPTH_MODE.ULTRA
     init_params.coordinate_units=sl.UNIT.METER
-    init_params.coordinate_system=sl.COORDINATE_SYSTEM.RIGHT_HANDED_Y_UP
+    init_params.coordinate_system=sl.COORDINATE_SYSTEM.RIGHT_HANDED_Z_UP_X_FWD
     init_params.depth_minimum_distance = 0.1 # Set the minimum depth perception distance to 15cm
     # Open the camera
     cam = sl.Camera()
@@ -151,7 +191,13 @@ def main():
     mat = sl.Mat()
     depth = sl.Mat()
     point_cloud = sl.Mat()
-   
+    plane = sl.Plane()
+
+    find_plane_status = sl.ERROR_CODE.SUCCESS
+    tracking_state = sl.POSITIONAL_TRACKING_STATE.OFF
+    cam.enable_positional_tracking()
+    # coord=sl.unit2()
+    pose=sl.Pose()
     image_width = cam.get_camera_information().camera_resolution.width
     image_height = cam.get_camera_information().camera_resolution.height
     print("image resolution '{0}'x'{1}' ".format(image_width,image_height))
@@ -168,6 +214,7 @@ def main():
             # Retrieve depth map. Depth is aligned on the left image
             cam.retrieve_measure(depth, sl.MEASURE.DEPTH)
             # Retrieve colored point cloud. Point cloud is aligned on the left image.
+            tracking_state = cam.get_position(pose) # Get the tracking state of the camera
             cam.retrieve_measure(point_cloud, sl.MEASURE.XYZRGBA)
             image.flags.writeable = False
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -195,20 +242,66 @@ def main():
                     #     [hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].x * image_width
                     #     ,hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y * image_height]], np.int32)      
                     pts = np.array([
-                        [hand_landmarks.landmark[2].x * image_width,
-                        hand_landmarks.landmark[2].y * image_height],
+                        [hand_landmarks.landmark[5].x * image_width,
+                        hand_landmarks.landmark[5].y * image_height],
+                        [hand_landmarks.landmark[1].x * image_width,
+                        hand_landmarks.landmark[1].y * image_height],
                         [hand_landmarks.landmark[0].x * image_width,
                         hand_landmarks.landmark[0].y * image_height],
-                        [hand_landmarks.landmark[17].x * image_width,
-                        hand_landmarks.landmark[17].y * image_height],
-                        [hand_landmarks.landmark[12].x * image_width
-                        ,hand_landmarks.landmark[12].y * image_height]], np.int32)
+                        [hand_landmarks.landmark[17].x * image_width
+                        ,hand_landmarks.landmark[17].y * image_height]], np.int32)
                     cent=centroid(pts)
                     a,b=cent
                     # print(pts)
+                    if tracking_state == sl.POSITIONAL_TRACKING_STATE.OK:  
+                        # Detect the plane passing by the depth value of pixel coord
+                        find_plane_status = cam.find_plane_at_hit(cent, plane)
+                    if find_plane_status == sl.ERROR_CODE.SUCCESS:
+                        normal = plane.get_normal() # Get the normal vector of the detected plane
+                        plane_equation = plane.get_plane_equation() # Get (a,b,c,d) where ax+by+cz=d  
+                        plane_pose=plane.get_pose()
+                        # print("plane_pose = ",plane_pose)
+                        # print("camera_pose = ",pose.pose_data())
+                        orient = plane_pose.get_orientation().get()
+                        # print("orintation = ", orient)
+                        
+                        tx = round(plane_pose.get_translation().get()[0], 3)
+                        ty = round(plane_pose.get_translation().get()[1], 3)
+                        tz = round(plane_pose.get_translation().get()[2], 3)
+                        # print("Translation: Tx: {0}, Ty: {1}, Tz {2}, \n".format(tx, ty, tz))
+                        ox = round(plane_pose.get_orientation().get()[0], 3)
+                        oy = round(plane_pose.get_orientation().get()[1], 3)
+                        oz = round(plane_pose.get_orientation().get()[2], 3)
+                        ow = round(plane_pose.get_orientation().get()[3], 3)
+                        # print("Orientation: Ox: {0}, Oy: {1}, Oz {2}, Ow: {3}\n".format(ox, oy, oz, ow))
+                        marker_pose.pose.position.x =tx
+                        marker_pose.pose.position.y =ty
+                        marker_pose.pose.position.z =tz 
+                        marker_pose.pose.orientation.x =ox
+                        marker_pose.pose.orientation.y =oy
+                        marker_pose.pose.orientation.z =oz
+                        marker_pose.pose.orientation.w =ow
+                        marker_pose.header.frame_id = "panda_hand_tcp"
+                        marker_pose.header.stamp = rospy.Time(0)
+                        pose_pub.publish(marker_pose)
+                        euler = plane_pose.get_euler_angles(radian=True)
+                        # print("euler_angles = ", euler)
+                        check_angle(euler,tx)
+            
+                        # plane_transform = sl.Transform()
+                        # plane_equation = plane.get_transform()
+                        # print("plane equation = ",plane_equation," plane normal = ",10*normal)
+                        # p=check_distance(point_cloud,a,b)
+                        # if not np.isnan(p) and not np.isinf(p) and p>=0  : 
+                        #     check_angle(100*normal,p)
+                            
+                            # Create axis
+                          
+                              
+
                     points=np.append(pts,[cent],axis=0)
                     # print(pts)
-                    center_distance,p=check_distance(point_cloud,a,b)
+                    # center_distance,p=check_distance(point_cloud,a,b)
 
                     # print("pointcloud vlaue = ",p,"depth",depth.get_value(a,b))
                     # print("center ",cent ," at distance  = ",center_distance)
@@ -217,7 +310,8 @@ def main():
                     # print(len(f))
                     
                     # print(d) 
-                    dist=np.array(d)   
+                    dist=np.array(d)  
+                    # check_direction(dist) 
                     if not np.isnan(dist.all()) and not np.isinf(dist.all()):
                         # cv2.putText(image, str(round(center_distance,2)) ,(cent),cv2.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv2.LINE_AA)
                         # list=[distance,x,y]
@@ -269,5 +363,8 @@ def main():
 if __name__ == "__main__":
     # pub = rospy.Publisher("/finger_cordinates", Float32MultiArray, queue_size=10)
     # rospy.init_node('finger_cordinates')
+    rospy.init_node("equilibrium_pose_node")
+    pose_pub = rospy.Publisher(
+        "equilibrium_pose", PoseStamped, queue_size=1)
     main()
     # rospy.spin()
