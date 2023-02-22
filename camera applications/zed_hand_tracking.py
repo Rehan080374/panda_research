@@ -1,3 +1,4 @@
+import sched
 import numpy as np
 import os
 import configparser
@@ -64,7 +65,24 @@ marker_pose = PoseStamped()
     #     return False, "Counter has not been reset"
 start_x=0
 start_y=0
-start_z=0   
+start_z=0 
+index=0
+
+def rolling_average(a,window) : 
+    global index
+    array=a
+    s=0
+    m_average = 0
+    # print(index)
+    if index>window:
+         
+        for i in range(0,window):
+            s=s+array[i+index-window]
+        m_average=s/window
+                    
+    
+    return m_average     
+     
 def check_direction(distance) :
 
     d_thumb=distance[4]-distance[0]
@@ -163,6 +181,7 @@ def centroid(vertexes):
      return(_x, _y)    
     
 def main():
+    index=0
     # rospy.init_node('finger_cordinates')
     # finger_cordinates()
     list=[0,0,0]
@@ -206,6 +225,8 @@ def main():
     start=[int(center[0]-square_width[0]/2),int(center[1]-square_width[1]/2)]
     end=[int(center[0]+square_width[0]/2),int(center[1]+square_width[1]/2)]
     # print(start,end)
+    tx,ty,tz,ox,oy,oz,ow=[np.array for _ in range(7)]
+    window=2
     while cam.open():
         err = cam.grab(runtime)
         if (err == sl.ERROR_CODE.SUCCESS) :
@@ -265,29 +286,33 @@ def main():
                         orient = plane_pose.get_orientation().get()
                         # print("orintation = ", orient)
                         
-                        tx = round(plane_pose.get_translation().get()[0], 3)
-                        ty = round(plane_pose.get_translation().get()[1], 3)
-                        tz = round(plane_pose.get_translation().get()[2], 3)
+                        tx= np.append(tx,round(plane_pose.get_translation().get()[0], 3))
+                        ty = np.append(ty,round(plane_pose.get_translation().get()[1], 3))
+                        tz = np.append(tz,round(plane_pose.get_translation().get()[2], 3))
                         # print("Translation: Tx: {0}, Ty: {1}, Tz {2}, \n".format(tx, ty, tz))
-                        ox = round(plane_pose.get_orientation().get()[0], 3)
-                        oy = round(plane_pose.get_orientation().get()[1], 3)
-                        oz = round(plane_pose.get_orientation().get()[2], 3)
-                        ow = round(plane_pose.get_orientation().get()[3], 3)
+                        ox = np.append(ox,round(plane_pose.get_orientation().get()[0], 3))
+                        oy = np.append(oy,round(plane_pose.get_orientation().get()[1], 3))
+                        oz = np.append(oz,round(plane_pose.get_orientation().get()[2], 3))
+                        ow = np.append(ow,round(plane_pose.get_orientation().get()[3], 3))
                         # print("Orientation: Ox: {0}, Oy: {1}, Oz {2}, Ow: {3}\n".format(ox, oy, oz, ow))
-                        marker_pose.pose.position.x =tx
-                        marker_pose.pose.position.y =ty
-                        marker_pose.pose.position.z =tz 
-                        marker_pose.pose.orientation.x =ox
-                        marker_pose.pose.orientation.y =oy
-                        marker_pose.pose.orientation.z =oz
-                        marker_pose.pose.orientation.w =ow
-                        marker_pose.header.frame_id = "panda_hand_tcp"
-                        marker_pose.header.stamp = rospy.Time(0)
-                        pose_pub.publish(marker_pose)
-                        euler = plane_pose.get_euler_angles(radian=True)
-                        # print("euler_angles = ", euler)
-                        check_angle(euler,tx)
-            
+                        if index>window: 
+                            marker_pose.pose.position.x =round(np.mean(tx[index-window:index]),3)
+                            marker_pose.pose.position.y =round(np.mean(ty[index-window:index]),3)
+                            marker_pose.pose.position.z =round(np.mean(tz[index-window:index]),3) 
+                            marker_pose.pose.orientation.x =round(np.mean(ox[index-window:index]),3)
+                            marker_pose.pose.orientation.y =round(np.mean(oy[index-window:index]),3)
+                            marker_pose.pose.orientation.z =round(np.mean(oz[index-window:index]),3)
+                            marker_pose.pose.orientation.w =round(np.mean(ow[index-window:index]),3)
+                            marker_pose.header.frame_id = "panda_hand_tcp"
+                            marker_pose.header.stamp = rospy.Time(0)
+                            pose_pub.publish(marker_pose)
+                            rate.sleep()
+                        euler = plane_pose.get_euler_angles(radian=False)
+                        print("euler_angles = ", euler)
+                        # check_angle(euler,tx)
+                        # if index>10:
+                        #     print("tx ", tx[index],"average tx =",np.mean(tx[index-10:index]))
+                            # print("tY ", ty[index],"average tY =",rolling_average(ty,10))
                         # plane_transform = sl.Transform()
                         # plane_equation = plane.get_transform()
                         # print("plane equation = ",plane_equation," plane normal = ",10*normal)
@@ -296,7 +321,7 @@ def main():
                         #     check_angle(100*normal,p)
                             
                             # Create axis
-                          
+                        index+=1
                               
 
                     points=np.append(pts,[cent],axis=0)
@@ -356,15 +381,17 @@ def main():
         
         if cv2.waitKey(30) >= 0 :
                 break    
-    
+                
     cam.close()
     
     
 if __name__ == "__main__":
     # pub = rospy.Publisher("/finger_cordinates", Float32MultiArray, queue_size=10)
     # rospy.init_node('finger_cordinates')
-    rospy.init_node("equilibrium_pose_node")
+    rospy.init_node("my_equilibrium_pose_node")
     pose_pub = rospy.Publisher(
-        "equilibrium_pose", PoseStamped, queue_size=1)
+        "my_equilibrium_pose", PoseStamped, queue_size=10)
+    rate = rospy.Rate(100)    
     main()
+    
     # rospy.spin()
