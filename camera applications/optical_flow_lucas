@@ -7,17 +7,17 @@ parser = argparse.ArgumentParser(description='This sample demonstrates Lucas-Kan
 
 
 # image=cap.read()
-parser.add_argument('image', type=str, help='/home/panda/Downloads/slow_traffic_small.mp4')
-args = parser.parse_args()
-cap = cv.VideoCapture(0)
+# parser.add_argument('image', type=str, help='path to image file')
+# args = parser.parse_args()
+cap = cv.VideoCapture("slow_traffic_small.mp4")
 # params for ShiTomasi corner detection
-feature_params = dict( maxCorners = 100,
-                       qualityLevel = 0.3,
-                       minDistance = 7,
-                       blockSize = 7 )
+feature_params = dict( maxCorners = 5,
+                       qualityLevel = 0.9,
+                       minDistance = 5,
+                       blockSize = 10)
 # Parameters for lucas kanade optical flow
-lk_params = dict( winSize  = (15,15),
-                  maxLevel = 2,
+lk_params = dict( winSize  = (25,25),
+                  maxLevel = 3,
                   criteria = (cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 0.03))
 # Create some random colors
 color = np.random.randint(0,255,(100,3))

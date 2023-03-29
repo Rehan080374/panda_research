@@ -31,6 +31,10 @@ import configparser
 import sys
 import cv2
 import mediapipe as mp
+import pyzed.sl as sl
+import math
+import rospy
+from geometry_msgs.msg import PoseStamped
 # from mediapipe.tasks.python import vision
 # from mediapipe.tasks import python
 # from mediapipe_model_maker import gesture_recognizer
@@ -94,6 +98,7 @@ def main() :
             # recognizer.recognize_async(mp_image, frame_timestamp_ms)
             width = image.shape[0]
             height = image.shape[1]
+            #  print(mp_image.size())
             # image=left_right_image[0]
             
 
@@ -122,19 +127,21 @@ def main() :
             #     # i+=1
                 # landmarks=[]
                 for i in range(20):
-                    # x=round(hand_landmarks[0][i].x * width)
-                    # y=round(hand_landmarks[0][i].y* height)
+                    x=round(hand_landmarks[0][i].x * height)
+                    y=round(hand_landmarks[0][i].y* width)
                     # cent=(x,y)
-                    p1=[hand_landmarks[0][i].x * width,hand_landmarks[0][i].y * height]
-                #   print(f'Index finger tip coordinate: ',i,'  (',f'{hand_landmarks[0][i].x * image_size.width}, 'f'{hand_landmarks[0][i].y * image_size.height})')  
-                    cv2.circle(image,p1,radius=3,color=(0,255,255),thickness=10)
+                    if results.hand_landmarks:
+                        # p1=[hand_landmarks[0][i].x * width,hand_landmarks[0][i].y * height]
+                        p1=(x,y)
+                    #   print(f'Index finger tip coordinate: ',i,'  (',f'{hand_landmarks[0][i].x * image_size.width}, 'f'{hand_landmarks[0][i].y * image_size.height})')  
+                        cv2.circle(image,p1,radius=1,color=(12,25,255),thickness=10)
                 # for  hand_landmark in results.hand_landmarks:
                     # mp_drawing.draw_landmarks(image,Landmark,mp_hands.HAND_CONNECTIONS,mp_drawing_styles.get_default_hand_landmarks_style(),mp_drawing_styles.get_default_hand_connections_style())
             #          mp_drawing.draw_landmarks(image,landmarks,mp_hands.HAND_CONNECTIONS,mp_drawing_styles.get_default_hand_landmarks_style(),mp_drawing_styles.get_default_hand_connections_style())
                 #    for Landmark in  hand_landmarks:     
                 # mp_drawing.draw_landmarks(image,results.hand_world_landmarks, mp_hands.HAND_CONNECTIONS)
                     # print(f'Index finger tip coordinate: (',f'{landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_size.width}, 'f'{landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_size.height})')
-                    print(x,y )
+                    # print(x,y )
                 # for landmark in  landmarks:
                 # mp_drawing.draw_landmarks(image,landmarks, mp_hands.HAND_CONNECTIONS)
 

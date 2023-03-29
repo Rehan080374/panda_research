@@ -259,7 +259,7 @@ def main():
                
                 lbl = str(results.multi_handedness[0].classification[0].label)
                 score=float(results.multi_handedness[0].classification[0].score)
-                
+                # print(results)
                     # print(handedness_dict["classification"])
                 if lbl=="Left" and score > 0.6: 
                     # print("label =",lbl,"score = ",score)   
@@ -306,7 +306,7 @@ def main():
                         # print (st)    
                         # print(dist_1,dist_2,dist_3)
                         # print("distance = ",finger_distance)
-                        cv2.circle(image,cent,radius=1,color=(0,255,255),thickness=10) 
+                        cv2.circle(image,cent,radius=3,color=(0,255,255),thickness=10) 
                         a,b=cent
                         # print(pts)
                         # if tracking_state == sl.POSITIONAL_TRACKING_STATE.OK:  
@@ -352,7 +352,7 @@ def main():
                                 marker_pose.header.seq = index
                                 marker_pose.header.stamp = rospy.get_rostime()
                                 pose_pub.publish(marker_pose)
-                                string_pub.publish("string")
+                                # string_pub.publish("string")
                                 # print(marker_pose)
                                 rate.sleep()
                             
@@ -403,8 +403,8 @@ if __name__ == "__main__":
     rospy.init_node("my_equilibrium_pose_node")
     pose_pub = rospy.Publisher(
         "my_equilibrium_pose", PoseStamped, queue_size=10)
-    string_pub =rospy.Publisher(
-        "my_equilibrium_pose1", String, queue_size=10)
+    # string_pub =rospy.Publisher(
+    #     "my_equilibrium_pose1", String, queue_size=10)
     rate = rospy.Rate(20)    
     main()
     
