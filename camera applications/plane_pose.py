@@ -1,7 +1,6 @@
 import sched
 import numpy as np
-import os
-import configparser
+
 import sys
 import cv2
 import wget
@@ -190,13 +189,50 @@ def centroid(vertexes):
      _x =int( sum(_x_list) / _len)
      _y = int(sum(_y_list) / _len)
      return(_x, _y)    
+def check_angles(point_cloud,p1,p2,p3):
+    _,wrist=point_cloud.get_value(p1[0],p1[1])
+    _,pinky=point_cloud.get_value(p2[0],p2[1])
+    _,ind=point_cloud.get_value(p3[0],p3[1])
+    # print(wrist) 
+       
+    v1 = np.array(
+        [
+            wrist[0] - ind[0],
+            wrist[1] - ind[1],
+            wrist[2] - ind[2],
+        ]
+    )
+    v2 = np.array(
+        [
+            wrist[0] - pinky[0],
+            wrist[1] - pinky[1],
+            wrist[2] - pinky[2],
+        ]
+    )
     
+    normal = np.cross(v2, v1)
+    # print(normal)
+    camera_vector_x = np.array([1, 1, 1]) 
+    camera_vector_y = np.array([0, 1, 0]) 
+    camera_vector_z = np.array([0, 0, 1])
+    
+    angle_x = math.atan2(np.linalg.norm(np.cross(camera_vector_x, normal)), np.dot(camera_vector_x, normal)) 
+    # print(angle_x*180/math.pi,np.dot(camera_vector_x, normal))
+    angle_y = math.atan2(np.linalg.norm(np.cross(camera_vector_y, normal)), np.dot(camera_vector_x, normal))
+    angle_z = math.atan2(np.linalg.norm(np.cross(camera_vector_z, normal)), np.dot(camera_vector_x, normal))
+    euler_angles=[angle_x*180/math.pi,angle_y*180/math.pi,angle_z*180/math.pi]
+    # print(euler_angles)
+    theta_y= math.acos((np.dot(camera_vector_z, normal))/(np.linalg.norm(camera_vector_z)*np.linalg.norm(normal))) 
+    theta1= math.acos((np.dot(camera_vector_x, normal))/(np.linalg.norm(camera_vector_x)*np.linalg.norm(normal)))
+    theta_z= math.atan2(np.linalg.norm(np.cross(camera_vector_y, normal)), np.dot(camera_vector_y, normal))
+    # print(theta1*180/math.pi)
+    return euler_angles    
 def main():
     index=0
     # rospy.init_node('finger_cordinates')
     # finger_cordinates()
     list=[0,0,0]
-   
+    
     # initialise the media pipeline model
     mp_drawing = mp.solutions.drawing_utils
     mp_drawing_styles = mp.solutions.drawing_styles
@@ -279,8 +315,12 @@ def main():
                             [hand_landmarks.landmark[17].x * image_width
                             ,hand_landmarks.landmark[17].y * image_height]], np.int32)
                         cent=centroid(pts)
-                        # print("center",cent)
+                        
+                        euler_angles = check_angles(point_cloud,(pts[2]),(pts[3]),(pts[0]))
+                       
+                        # print("euler angles = ",euler_angles)
                         # cent=[cent[0]-10,cent[1]-10]
+                        # normal = np.cross(v2, v1)
                         p1=[hand_landmarks.landmark[8].x * image_width,hand_landmarks.landmark[8].y * image_height]
                         p2=[hand_landmarks.landmark[4].x * image_width,hand_landmarks.landmark[4].y * image_height]
                         p4=[hand_landmarks.landmark[16].x * image_width,hand_landmarks.landmark[16].y * image_height]
@@ -288,13 +328,7 @@ def main():
                         dist_1=math.dist(p3,p1)
                         dist_2=math.dist(p3,p2)
                         dist_3=math.dist(p3,p4)
-                        # m=check_distance_between_points(point_cloud,p3,p1)
-                        # n=check_distance_between_points(point_cloud,p3,p2)
-                        # print("max=",m,"min =",n)
-                        # min_dist=min(abs(p1[0]-p3[0]),abs(p1[1]-p3[1]))
-                        # max_dist=min(abs(p2[0]-p3[0]),abs(p2[1]-p3[1]))
-                        # print("max= ",max_dist,"min= ",min_dist)
-                        # finger_distance=check_distance_between_points(point_cloud,p1,p2)
+                        
                         
                         if dist_1<dist_2:
                             # print("open")
@@ -305,85 +339,54 @@ def main():
                         else:
                             # print("closed") 
                             st="open"   
-                        # print (st)    
-                        # print(dist_1,dist_2,dist_3)
-                        # print("distance = ",finger_distance)
+                       
                         cv2.circle(image,cent,radius=3,color=(0,255,255),thickness=10) 
                         a,b=cent
-                        # print(pts)
-                        # if tracking_state == sl.POSITIONAL_TRACKING_STATE.OK:  
-                        # Detect the plane passing by the depth value of pixel coord
+                      
                         if a>0 and b >0:
                             find_plane_status = cam.find_plane_at_hit(cent, plane)
                         if find_plane_status == sl.ERROR_CODE.SUCCESS:
                             normal = plane.get_normal() # Get the normal vector of the detected plane
                             plane_equation = plane.get_plane_equation() # Get (a,b,c,d) where ax+by+cz=d  
+                            # print(normal)
                             plane_pose=plane.get_pose()
                             poly=plane.get_bounds()
                             # print("polygon = ",poly)
                             # print("plane_pose = ",plane_pose)
                             # print("camera_pose = ",pose.pose_data())
                             orient = plane_pose.get_orientation().get()
+                            translation=plane_pose.get_translation().get()
                             # print("orintation = ", orient)
                             
-                            tx= np.append(tx,round(plane_pose.get_translation().get()[0], 3))
-                            ty = np.append(ty,round(plane_pose.get_translation().get()[1], 3))
-                            tz = np.append(tz,round(plane_pose.get_translation().get()[2], 3))
-                            # print("Translation: Tx: {0}, Ty: {1}, Tz {2}, \n".format(tx, ty, tz))
-                            ox = np.append(ox,round(plane_pose.get_orientation().get()[0], 3))
-                            oy = np.append(oy,round(plane_pose.get_orientation().get()[1], 3))
-                            oz = np.append(oz,round(plane_pose.get_orientation().get()[2], 3))
-                            ow = np.append(ow,round(plane_pose.get_orientation().get()[3], 3))
-                            # print("Orientation: Ox: {0}, Oy: {1}, Oz {2}, Ow: {3}\n".format(ox, oy, oz, ow))
-                            if index>window: 
-                                # marker_pose.pose.position.x =round(np.mean(tx[index-window:index]),3)
-                                # marker_pose.pose.position.y =round(np.mean(ty[index-window:index]),3)
-                                # marker_pose.pose.position.z =round(np.mean(tz[index-window:index]),3) 
-                                # marker_pose.pose.orientation.x =round(np.mean(ox[index-window:index]),3)
-                                # marker_pose.pose.orientation.y =round(np.mean(oy[index-window:index]),3)
-                                # marker_pose.pose.orientation.z =round(np.mean(oz[index-window:index]),3)
-                                # marker_pose.pose.orientation.w =round(np.mean(ow[index-window:index]),3)
-                                marker_pose.pose.position.x =tx[index]
-                                marker_pose.pose.position.y =ty[index]
-                                marker_pose.pose.position.z =tz[index] 
-                                marker_pose.pose.orientation.x =ox[index]
-                                marker_pose.pose.orientation.y =oy[index]
-                                marker_pose.pose.orientation.z =oz[index]
-                                marker_pose.pose.orientation.w =ow[index]
+                            if cent[0]>0 and cent[0]>0:
+                                _,xyz=point_cloud.get_value(cent[0],cent[1])
+                                print("x = ",round(xyz[0],3),"y = ",round(xyz[1],3),"z = ",round(xyz[2],3),"index=",index)
+                                marker_pose.pose.position.x =round(translation[0], 3)
+                                marker_pose.pose.position.y =round(translation[1], 3)
+                                marker_pose.pose.position.z =round(translation[2], 3)
+                                # marker_pose.pose.position.x =round(xyz[0], 3)
+                                # marker_pose.pose.position.y =round(xyz[1], 3)
+                                # marker_pose.pose.position.z =round(xyz[2], 3)
+                                marker_pose.pose.orientation.x =round(orient[0], 3)
+                                marker_pose.pose.orientation.y =round(orient[1], 3)
+                                marker_pose.pose.orientation.z =round(orient[2], 3)
+                                marker_pose.pose.orientation.w =round(orient[3], 3)
+                                # marker_pose.header.frame_id = st
                                 marker_pose.header.frame_id = st
                                 marker_pose.header.seq = index
+
                                 marker_pose.header.stamp = rospy.get_rostime()
                                 pose_pub.publish(marker_pose)
+                                # print(marker_pose)
                                 # string_pub.publish("string")
                                 # print(marker_pose)
                                 rate.sleep()
-                            
-                            euler = plane_pose.get_euler_angles(radian=False)
-                            # print("eulers = ",marker_pose.header.seq)
-                            
-                            index+=1
-                        # else:
-                        #      print("lost positional tracking")            
-
-                        # points=np.append(pts,[cent],axis=0)
+                                
+                                euler = plane_pose.get_euler_angles(radian=False)
+                                # print("eulers = ",euler)
+                                
+                                index+=1
                         
-                        # d=check_distance_array(point_cloud,points)
-                        # # d=check_depth(depth,points)
-                        # # print(len(f))
-                        
-                        # # print(d) 
-                        # dist=np.array(d)  
-                        # # check_direction(dist) 
-                        # if not np.isnan(dist.all()) and not np.isinf(dist.all()):
-                            
-                        #     for i in range (0,len(points)):
-                        #         x,y=points[i]
-                        #         # print(i)
-                        #         cv2.putText(image, str(round(d[i],3)) ,(points[i]),cv2.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv2.LINE_AA)
-                            
-                        #     p = pts.reshape((-1,1,2))
-                        #     cv2.polylines(image,[p],True,(0,255,255))    
-                            
                             
                        
                    
@@ -407,7 +410,7 @@ if __name__ == "__main__":
         "my_equilibrium_pose", PoseStamped, queue_size=10)
     # string_pub =rospy.Publisher(
     #     "my_equilibrium_pose1", String, queue_size=10)
-    rate = rospy.Rate(10)    
+    rate = rospy.Rate(20)    
     main()
     
     # rospy.spin()
