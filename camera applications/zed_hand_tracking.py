@@ -343,9 +343,13 @@ def main():
                                 # marker_pose.pose.orientation.y =round(np.mean(oy[index-window:index]),3)
                                 # marker_pose.pose.orientation.z =round(np.mean(oz[index-window:index]),3)
                                 # marker_pose.pose.orientation.w =round(np.mean(ow[index-window:index]),3)
-                                marker_pose.pose.position.x =tx[index]
-                                marker_pose.pose.position.y =ty[index]
-                                marker_pose.pose.position.z =tz[index] 
+                                # marker_pose.pose.position.x =tx[index]
+                                # marker_pose.pose.position.y =ty[index]
+                                # marker_pose.pose.position.z =tz[index] 
+                                _,xyz=point_cloud.get_value(cent[0],cent[1])
+                                marker_pose.pose.position.x =xyz[0]
+                                marker_pose.pose.position.y =xyz[1]
+                                marker_pose.pose.position.z =xyz[2] 
                                 marker_pose.pose.orientation.x =ox[index]
                                 marker_pose.pose.orientation.y =oy[index]
                                 marker_pose.pose.orientation.z =oz[index]

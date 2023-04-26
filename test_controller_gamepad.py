@@ -227,8 +227,8 @@ class MoveGroupPythonInterfaceTutorial(object):
             group_name = "hand"
             move_group = moveit_commander.MoveGroupCommander(group_name)
             joint_goal = move_group.get_current_joint_values()
-            joint_goal[0] = opened[0]
-            joint_goal[1] = opened[1]
+            joint_goal[0] = 0.035
+            joint_goal[1] = 0.035
             move_group.go(joint_goal, wait=True)
             move_group.stop()
             #client = actionlib.SimpleActionClient('franka_gripper/grasp',MoveAction)
@@ -261,7 +261,7 @@ class MoveGroupPythonInterfaceTutorial(object):
             goal.epsilon.outer = 0.0510
 
             goal.speed = 0.1
-            goal.width = 0.04
+            goal.width = 0.00
             #print("goal=",goal)
             client.send_goal(goal)
             wait = client.wait_for_result(timeout)

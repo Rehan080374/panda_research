@@ -65,7 +65,7 @@ def pose_callback(msg):
     marker_pose.pose.position.x=p[0]
     marker_pose.pose.position.y=p[1]
     marker_pose.pose.position.z=p[2]   
-    pose1=[msg.pose.position.x-r,msg.pose.position.y,msg.pose.position.z-0.08]
+    pose1=[msg.pose.position.x-r,msg.pose.position.y,msg.pose.position.z]
     
    
     # print("pose  = ",pose1)
@@ -86,22 +86,22 @@ def pose_callback(msg):
     
     
    
-    scale =0.5
+    scale =0.3
     error=[0,0,0]
     for i in range(3):
         error[i]=(pose2[i]-p[i])
     # print ("error = ",error)    
     if msg.pose.position.x !=x or msg.pose.position.y !=y or msg.pose.position.z !=z :  
-        if abs(error[0])>0.02 :   
+        if abs(error[0])>0.01 :   
             marker_pose.pose.position.x += (error[0])*scale
             # marker_pose.pose.position.x=pose2[0] 
-        if abs(error[1])>0.02 :   
+        if abs(error[1])>0.01 :   
             marker_pose.pose.position.y += (error[1])*scale
             # marker_pose.pose.position.y=pose2[1]
-        if abs(error[2])>0.02 :   
+        if abs(error[2])>0.01 :   
             marker_pose.pose.position.z += (error[2])*scale
             # marker_pose.pose.position.z=pose2[2]
-        print("pose  = ",marker_pose) 
+        print("pose  = ",pose2) 
         
     
      
