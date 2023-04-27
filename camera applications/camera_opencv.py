@@ -92,8 +92,9 @@ def main() :
             # Get a new frame from camera
             retval, frame = cap.read()
             # Extract left and right images from side-by-side
-            left_right_image = np.split(frame, 2, axis=1)
-            image = cv2.cvtColor(left_right_image[0], cv2.COLOR_BGR2RGB)
+            # left_right_image = np.split(frame, 2, axis=1)
+            # image = cv2.cvtColor(left_right_image[0], cv2.COLOR_BGR2RGB)
+            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
             # recognizer.recognize_async(mp_image, frame_timestamp_ms)
             width = image.shape[0]
