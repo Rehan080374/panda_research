@@ -350,7 +350,7 @@ def publish_rotation_matrix(R):
 
 if __name__ == "__main__":
     
-    rospy.init_node("matrix_publisher")
+    rospy.init_node("pose_publisher")
     
     pose_sub = rospy.Subscriber("my_equilibrium_pose", PoseStamped, 
                                  pose_callback)
@@ -358,7 +358,7 @@ if __name__ == "__main__":
                                 JointState, gripper_state_callback)
     state_sub= rospy.Subscriber("franka_state_controller/franka_states",
                                 FrankaState, franka_state_callback)
-    pub = rospy.Publisher('rotation_matrix', Float32MultiArray, queue_size=10)
+    pub = rospy.Publisher('/cartesian_pose_example_controller/equilibrium_pose', Float32MultiArray, queue_size=10)
     # pub = rospy.Publisher('rotation_matrix', Float32MultiArray, queue_size=10)
     listener1 = tf.TransformListener()
     
