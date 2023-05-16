@@ -363,7 +363,7 @@ def main():
                                 rate.sleep()
                             
                             euler = plane_pose.get_euler_angles(radian=False)
-                            # print("eulers = ",marker_pose.header.seq)
+                            # print("eulers = ",marker_pose.header.seq)c
                             
                             index+=1
                         # else:
