@@ -1,0 +1,5 @@
+0 push
+1 pull
+2 stop
+3 up
+4 down

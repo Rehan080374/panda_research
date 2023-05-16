@@ -1,0 +1,4 @@
+0 push
+1 stop 
+2 pull
+3 none
