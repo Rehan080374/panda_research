@@ -156,9 +156,9 @@ class HandDetector:
             distance = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2)
             return distance
 def main():
-    folder = "/home/rehan/catkin_ws/src/panda_research/hand_classifier/data/cnn_data"
+    folder = "/home/panda/model_data/cnn_data"
     # folder_orignal = "/home/rehan/catkin_ws/src/panda_research/hand_classifier/data/cnn_data"
-    class_name="rotate_ccw"
+    class_name="rotate_cw"
     iteration = 0 
     limit =2000
     start_time=None
@@ -168,7 +168,7 @@ def main():
     handDetector = HandDetector()
 
     # Open a video capture object
-    cap = cv2.VideoCapture(4)
+    cap = cv2.VideoCapture(0)
 
     # Initialize variables to store left and right hand landmarks
     
