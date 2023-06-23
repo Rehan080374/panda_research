@@ -11,6 +11,7 @@ import rospy
 from std_msgs.msg import String
 import psutil
 from detection import HandDetector
+import pyttsx3
 tf.config.set_visible_devices([], 'GPU')
 from keras.models import load_model
 def is_roscore_running():
@@ -25,12 +26,13 @@ def is_master_running():
     except rospy.ROSException:
         return False
 
+
 def main():
     
-    rospy.init_node("gesture_node")
-    gesture_pub = rospy.Publisher(
-        "gesture_pose", String, queue_size=10)
-    folder = "/home/panda/model_data/model1/"
+    # rospy.init_node("gesture_node")
+    # gesture_pub = rospy.Publisher(
+    #     "gesture_pose", String, queue_size=10)
+    folder = "/home/panda/model_data/model2/"
     # folder1=os.path.join(folder,class_name)
 
     model_path=os.path.join(folder,"keras_model.h5")
@@ -43,6 +45,7 @@ def main():
     limit =2000
     start_time=None
     recorded_array=None
+    labelp=None
     model=load_model(model_path)
     with open(label_path, 'r') as f:
         labels = f.read().splitlines()
@@ -60,7 +63,7 @@ def main():
     # Open a video capture object
     # if it throws img.shape is none check camera number
     # cap = cv2.VideoCapture(0)
-    capture = cv2.VideoCapture(2, cv2.CAP_V4L2)
+    capture = cv2.VideoCapture(0, cv2.CAP_V4L2)
     capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
     width = 1280
     height = 720
@@ -161,9 +164,15 @@ def main():
                                 2, (255, 100, 0), 2)
                         
                         gesture_pub.publish(label)
-                    
+                        
+                        # if labelp is not None and labelp != label:
+                        #     # text_to_speech(label)
+                        #     # engine.say(label)
+    
+                        #     # engine.runAndWait()
+                        # labelp=label
                     # print("Recorded Array:", (combined_array.shape))
-                    # Increment the iteration counter
+                    # Increment the iteration counterc
                     
                     # Clear the lists for the next recording
                     left_hand_landmarks = []
@@ -193,4 +202,7 @@ def main():
         # cv2.imshow("orignal", image_orignal)
     cv2.destroyAllWindows()    
 if __name__ == "__main__":
+    rospy.init_node("gesture_node")
+    gesture_pub = rospy.Publisher(
+        "gesture_pose", String, queue_size=10)
     main()
