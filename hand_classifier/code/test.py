@@ -95,31 +95,31 @@ center_x = 0.3+radius  # x-coordinate of the center
 center_y = 0  # y-coordinate of the center
 center_z = 0.4  # z-coordinate of the center
 
-phi_values = []
-theta_values = []
-x_values = []
-y_values = []
-z_values = []
+# phi_values = []
+# theta_values = []
+# x_values = []
+# y_values = []
+# z_values = []
 
-for phi_degrees in range(0, 360, 10):
-    for theta_degrees in range(0, 360, 10):
-        phi_values.append(phi_degrees)
-        theta_values.append(theta_degrees)
-        x, y, z = calculate_point_on_sphere(radius, center_x, center_y, center_z, phi_degrees, theta_degrees)
-        x_values.append(x)
-        y_values.append(y)
-        z_values.append(z)
-        print(f"At (phi: {phi_degrees}, theta: {theta_degrees}) degrees: ({x}, {y}, {z})")
+# for phi_degrees in range(0, 360, 10):
+#     for theta_degrees in range(0, 360, 10):
+#         phi_values.append(phi_degrees)
+#         theta_values.append(theta_degrees)
+#         x, y, z = calculate_point_on_sphere(radius, center_x, center_y, center_z, phi_degrees, theta_degrees)
+#         x_values.append(x)
+#         y_values.append(y)
+#         z_values.append(z)
+#         print(f"At (phi: {phi_degrees}, theta: {theta_degrees}) degrees: ({x}, {y}, {z})")
 
-# Plotting the points
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-ax.scatter(x_values, y_values, z_values, c='r', marker='o')
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.set_zlabel('Z')
-ax.set_title('Points on a Sphere')
-plt.show()
+# # Plotting the points
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# ax.scatter(x_values, y_values, z_values, c='r', marker='o')
+# ax.set_xlabel('X')
+# ax.set_ylabel('Y')
+# ax.set_zlabel('Z')
+# ax.set_title('Points on a Sphere')
+# plt.show()
 
 
 # # Example usage
@@ -136,3 +136,41 @@ plt.show()
 # print(b)
 
 # plot_vector(a, b, origin, r)
+import pyttsx3
+import rospy
+from std_msgs.msg import String
+l=None
+def text_to_speech(text):
+    global l
+    # Initialize the pyttsx3 engine
+    if text.data!="None":
+        speach =text.data
+        print(speach)
+        engine = pyttsx3.init()
+
+        voices = engine.getProperty('voices')
+        # for voice in voices:
+
+        #     print(voice.id)
+        engine.setProperty('voice', voices[16].id)  # Set the second voice from the list
+
+
+        # Set the speech rate
+        engine.setProperty('rate', 120)
+        # Convert the text to speech
+        if l != speach:
+            engine.say(speach)
+            engine.runAndWait()
+        l=speach
+
+def main():
+    l=None
+    rospy.init_node("text_to_speach")
+    pose_sub = rospy.Subscriber("/gesture_pose", String, text_to_speech,queue_size=10)
+    rospy.spin()
+# Example usage
+# text = "push , pull , turn clockwise"
+# rate = 120 
+# text_to_speech(text)
+if __name__ == "__main__":
+    main()

@@ -101,27 +101,28 @@ def main():
             
             # img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             for object in objects.object_list:
+                print(len(objects.object_list))
                 position="none"
                 object_position=object.position
                 print("object position {} object id {} ".format(object_position,object.id))
                 print(object.id)
+                if object_position[0]<1.5 :
+                    if object_position[1] >0 and object_position[0]<=1:
+                        position="left"
+                    elif object_position[1] <0 and object_position[0]<=1:
+                        position="right"
+                    elif object_position[0]>1:
+                        position="center"
+                    p.header.frame_id=position    
+                    bbox= object.bounding_box_2d
+                    bbox = np.asarray(bbox, dtype = 'int')
+                    cv2.rectangle(img, (int(bbox[0][0]),int(bbox[0][1])),(int(bbox[2][0]),int(bbox[2][1])),
+                                            (255, 0, 255), 5)  
 
-                if object_position[1] >0 and object_position[0]<=1:
-                    position="left"
-                elif object_position[1] <0 and object_position[0]<=1:
-                    position="right"
-                elif object_position[0]>1:
-                    position="center"
-                p.header.frame_id=position    
-                bbox= object.bounding_box_2d
-                bbox = np.asarray(bbox, dtype = 'int')
-                cv2.rectangle(img, (int(bbox[0][0]),int(bbox[0][1])),(int(bbox[2][0]),int(bbox[2][1])),
-                                        (255, 0, 255), 5)  
-
-                # cv2.putText(img, position, ((bbox[0][0]) + 20, bbox[0][1] - 30), cv2.FONT_HERSHEY_PLAIN,
-                                    # 2, (255, 0, 255), 2) 
-                cv2.putText(img, position, (500,200), cv2.FONT_HERSHEY_PLAIN,
-                                    2, (255, 0, 255), 2)
+                    # cv2.putText(img, position, ((bbox[0][0]) + 20, bbox[0][1] - 30), cv2.FONT_HERSHEY_PLAIN,
+                                        # 2, (255, 0, 255), 2) 
+                    cv2.putText(img, position, (500,200), cv2.FONT_HERSHEY_PLAIN,
+                                        2, (255, 0, 255), 2)
                     
             for hand in hands:
                 lm=hand["lmList"]
