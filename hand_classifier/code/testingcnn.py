@@ -32,7 +32,7 @@ def main():
     # rospy.init_node("gesture_node")
     # gesture_pub = rospy.Publisher(
     #     "gesture_pose", String, queue_size=10)
-    folder = "/home/panda/model_data/model2/"
+    folder = "/home/panda/model_data/model4/"
     # folder1=os.path.join(folder,class_name)
 
     model_path=os.path.join(folder,"keras_model.h5")
@@ -40,12 +40,12 @@ def main():
     scaler_file = os.path.join(folder,"scaler.pkl")
     normalizer_file= os.path.join(folder,"normalizer.pkl")
     # folder_orignal = "/home/rehan/catkin_ws/src/panda_research/hand_classifier/data/cnn_data"
-    class_name="rotate_ccw"
-    iteration = 0 
-    limit =2000
-    start_time=None
-    recorded_array=None
-    labelp=None
+    # class_name="rotate_ccw"
+    # iteration = 0 
+    # limit =2000
+    # start_time=None
+    # recorded_array=None
+    # labelp=None
     model=load_model(model_path)
     with open(label_path, 'r') as f:
         labels = f.read().splitlines()
@@ -71,13 +71,13 @@ def main():
     capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
     # Initialize variables to store left and right hand landmarks
     
+    left_hand_landmarks = []
+    left_hand_distances = []
+    right_hand_landmarks = []
+    right_hand_distances = []
+    combined_array=[]
     while True:
         
-        left_hand_landmarks = []
-        left_hand_distances = []
-        right_hand_landmarks = []
-        right_hand_distances = []
-        combined_array=[]
         # Read the video frame
         success, img = capture.read()
         image_orignal=img.copy()
@@ -113,7 +113,7 @@ def main():
                             left_hand_distances.append(length_with_right)
                     except Exception as e:
                         print(e)
-            # Collect landmarks and calculate distances for right handq
+            # Collect landmarks and calculate distances for right hand
             if right_hand is not None:
                 
                 for landmark in right_hand["lmList"]:
@@ -185,17 +185,7 @@ def main():
             
               
     
-        # Display the frame
-        
-        # if cv2.waitKey(1) & 0xFF == ord('s'):
-        #         start_time = time.time() + 10  # Set the start time with a 10-second delay
-        #         cv2.putText(img,"data recording will start in 10 seconds", (50,50), cv2.FONT_HERSHEY_PLAIN,
-        #                         2, (255, 40, 255), 2)
-        #         print("data recording will start in 10 seconds")
-        # # Break the loop if 'q' is pressed
-        # if cv2.waitKey(1) & 0xFF == ord('q') or iteration>=limit:
-        
-        #     break
+      
         if cv2.waitKey(30) >= 0 :
                 break  
         cv2.imshow("Frame", img)

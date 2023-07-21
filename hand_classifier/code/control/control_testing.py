@@ -130,4 +130,20 @@ def test_conversion():
     print("Euler Angle Difference (degrees):")
     print(euler_diff)
 # Run the testing function
-test_conversion()
+# test_conversion()
+radius=0.3
+r_step=5
+
+n_step = 360/r_step
+c=(((2*math.pi*radius))*r_step/360)
+print("circumference = ",c*n_step)
+circle_step=0
+for i in range(0,int(n_step),1):
+  circle_step += c
+  print ("iteratio  " , i ,"=",circle_step)
+# c_p=5
+# t_p=10
+# filter=0.005
+# for i in range(1000):
+#     c_p=filter*t_p+((1-filter)*c_p)
+#     print("current position = ",c_p)

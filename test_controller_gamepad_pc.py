@@ -105,7 +105,7 @@ from moveit_commander.conversions import pose_to_list
 # printing the data
 #print(str_list)
 #my_file.close()
-gamepad_input ='/dev/input/event5'
+gamepad_input ='/dev/input/event17'
 
 home=[0, -0.78539816339744830962, 0, -3 * 0.78539816339744830962, 0, 1.57079632679489661923, 0.78539816339744830962]
 #home=[0.010634786303106106, -0.7793822895183896, -0.010644634918499455, -2.4004822612227055, 0.027908380891381375, 1.6902482674546058, 0.7998376508951186]
@@ -603,12 +603,12 @@ class MoveGroupPythonInterfaceTutorial(object):
          joint_goal[1] = closed[1]
         elif string == 'add' :
          print("joint[6] clockwise motion ")
-         joint_goal[6] = joint_goal[6]+0.5
+         joint_goal[6] = joint_goal[6]+rad
          move_group.go(joint_goal, wait=True)
          
         elif string == 'sub' :
          print("joint[6] counterclockwise motion ")   
-         joint_goal[6] = joint_goal[6]-0.5
+         joint_goal[6] = joint_goal[6]-rad
          move_group.go(joint_goal, wait=True)
 
 
@@ -1253,7 +1253,7 @@ def main():
 
 
                     elif keyevent.keycode == 'BTN_TL':
-                        rot-=10
+                        rot-=1
                         if rot>=90:
                             rot=90
                         elif rot<=0:
@@ -1264,7 +1264,7 @@ def main():
 
 
                     elif keyevent.keycode == 'BTN_TR':
-                        rot+=10
+                        rot+=1
                         if rot>=90:
                             rot=90
                         elif rot<=0:
