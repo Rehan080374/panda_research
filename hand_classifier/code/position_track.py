@@ -107,26 +107,25 @@ def main():
                 position="none"
                 object_position=object.position
                 print("object position {} object id {} ".format(object_position,object.id))
-                print(object.id)
-                if object_position[0]<work_space :
-                    if object_position[1] >0 and object_position[0]<=object_length:
-                        position="left"
-                    elif object_position[1] <0 and object_position[0]<=object_length:
-                        position="right"
-                    elif object_position[0]>object_length:
-                        position="center"
-                    p.header.frame_id=position    
-                    bbox= object.bounding_box_2d
-                    bbox = np.asarray(bbox, dtype = 'int')
-                    cv2.rectangle(img, (int(bbox[0][0]),int(bbox[0][1])),(int(bbox[2][0]),int(bbox[2][1])),
-                                            (255, 0, 255), 5)  
+               
+              
+                if object_position[1] >0 and object_position[0]<=object_length:
+                    position="left"
+                elif object_position[1] <0 and object_position[0]<=object_length:
+                    position="right"
+                elif object_position[0]>object_length and object_position[0]<=work_space:
+                    position="center"
+                p.header.frame_id=position    
+                bbox= object.bounding_box_2d
+                bbox = np.asarray(bbox, dtype = 'int')
+                cv2.rectangle(img, (int(bbox[0][0]),int(bbox[0][1])),(int(bbox[2][0]),int(bbox[2][1])),
+                                        (255, 0, 255), 5)  
 
-                    # cv2.putText(img, position, ((bbox[0][0]) + 20, bbox[0][1] - 30), cv2.FONT_HERSHEY_PLAIN,
-                                        # 2, (255, 0, 255), 2) 
-                    cv2.putText(img, position, (500,200), cv2.FONT_HERSHEY_PLAIN,
-                                        2, (255, 0, 255), 2)
-                else:
-                     position ="none"   
+                # cv2.putText(img, position, ((bbox[0][0]) + 20, bbox[0][1] - 30), cv2.FONT_HERSHEY_PLAIN,
+                                    # 2, (255, 0, 255), 2) 
+                cv2.putText(img, position, (500,200), cv2.FONT_HERSHEY_PLAIN,
+                                    2, (255, 0, 255), 2)
+             
             for hand in hands:
                 lm=hand["lmList"]
                 # print(lm[0][0]*width,lm[0][1]*height)
@@ -136,10 +135,11 @@ def main():
                     # print(center)
                     distance =round(check_depth(depth,center),3)
                     # print("radius = ",distance) 
-                    if distance >=object_length and position=="center":
+                    if distance >=object_length :
                         distance =0
                     p.point.x=distance 
                     r=('radius' ,distance)
+                    print(r)
                     cv2.putText(img, str(r), ((bbox[0][0]) +50, bbox[0][1] +50), cv2.FONT_HERSHEY_PLAIN,
                                         2, (255, 0, 255), 2)   
                 else:

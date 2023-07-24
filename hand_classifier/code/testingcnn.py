@@ -12,7 +12,9 @@ from std_msgs.msg import String
 import psutil
 from detection import HandDetector
 import pyttsx3
-tf.config.set_visible_devices([], 'GPU')
+# tf.debugging.set_log_device_placement(True)
+
+# tf.config.set_visible_devices([], 'CPU')
 from keras.models import load_model
 def is_roscore_running():
     for proc in psutil.process_iter(['name']):
@@ -65,10 +67,12 @@ def main():
     # cap = cv2.VideoCapture(0)
     capture = cv2.VideoCapture(0, cv2.CAP_V4L2)
     capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-    width = 1280
+    width = 1280    
     height = 720
     capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+    fps = capture.get(cv2.CAP_PROP_FPS)
+    print("currevt fps = ",fps)
     # Initialize variables to store left and right hand landmarks
     
     left_hand_landmarks = []
@@ -77,10 +81,10 @@ def main():
     right_hand_distances = []
     combined_array=[]
     while True:
-        
+        start_time = time.time()
         # Read the video frame
         success, img = capture.read()
-        image_orignal=img.copy()
+        # image_orignal=img.copy()
         
         # Find hands in the frame
         hands, img, blk_img = handDetector.findHands(img, blk=True)
@@ -190,9 +194,10 @@ def main():
                 break  
         cv2.imshow("Frame", img)
         # cv2.imshow("orignal", image_orignal)
+        print("--- %s seconds ---" % (time.time() - start_time))
     cv2.destroyAllWindows()    
 if __name__ == "__main__":
     rospy.init_node("gesture_node")
     gesture_pub = rospy.Publisher(
-        "gesture_pose", String, queue_size=10)
+        "gesture_pose", String, queue_size=None,tcp_nodelay=False)
     main()
