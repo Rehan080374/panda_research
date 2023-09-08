@@ -10,7 +10,8 @@ from detection import HandDetector
 def main():
     folder = "/home/panda/model_data/cnn_data"
     # folder_orignal = "/home/rehan/catkin_ws/src/panda_research/hand_classifier/data/cnn_data"
-    class_name="fast"
+    class_name="ok"
+    starting_no=0
     iteration = 0 
     limit =2000
     start_time=None
@@ -20,8 +21,13 @@ def main():
     handDetector = HandDetector()
 
     # Open a video capture object
-    cap = cv2.VideoCapture(0)
-
+    # cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+    width = 1600
+    height = 900
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
     # Initialize variables to store left and right hand landmarks
     
     while True:
@@ -98,13 +104,13 @@ def main():
                     if len(combined_array)==210:
 
                         # Generate a new file name for each iteration
-                        file_name = os.path.join(folder,class_name, f"{class_name}_feature_{iteration}.npy")
+                        file_name = os.path.join(folder,class_name, f"{class_name}_feature_{iteration+starting_no}.npy")
 
                         # Save the recorded array to the new file using np.save()
                         np.save(file_name, combined_array)
                         print(f"Recorded array has been saved to {file_name}")
                         folder1=os.path.join(folder,class_name)
-                        cv2.imwrite(f'{folder1}/image_{class_name}_{iteration}.jpg',image_orignal) 
+                        cv2.imwrite(f'{folder1}/image_{class_name}_{iteration+starting_no}.jpg',image_orignal) 
                     print("Recorded Array:", len(combined_array))
                     # print("Recorded Array:", (combined_array.shape))
                     # Increment the iteration counter

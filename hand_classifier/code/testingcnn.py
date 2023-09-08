@@ -1,4 +1,6 @@
 
+import os
+os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 import cv2
 import os
 import numpy as np
@@ -14,7 +16,7 @@ from detection import HandDetector
 import pyttsx3
 # tf.debugging.set_log_device_placement(True)
 
-# tf.config.set_visible_devices([], 'CPU')
+tf.config.set_visible_devices([], 'GPU')
 from keras.models import load_model
 def is_roscore_running():
     for proc in psutil.process_iter(['name']):
@@ -34,7 +36,7 @@ def main():
     # rospy.init_node("gesture_node")
     # gesture_pub = rospy.Publisher(
     #     "gesture_pose", String, queue_size=10)
-    folder = "/home/panda/model_data/model4/"
+    folder = "/home/panda/model_data/model9/"
     # folder1=os.path.join(folder,class_name)
 
     model_path=os.path.join(folder,"keras_model.h5")
@@ -67,10 +69,11 @@ def main():
     # cap = cv2.VideoCapture(0)
     capture = cv2.VideoCapture(0, cv2.CAP_V4L2)
     capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-    width = 1280    
-    height = 720
+    width = 1920  
+    height = 1080
     capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+    capture.set(cv2.CAP_PROP_FPS, 10)
     fps = capture.get(cv2.CAP_PROP_FPS)
     print("currevt fps = ",fps)
     # Initialize variables to store left and right hand landmarks
@@ -80,12 +83,17 @@ def main():
     right_hand_landmarks = []
     right_hand_distances = []
     combined_array=[]
+    # frame_rate = 6
+    # prev = 0
     while True:
+        # time_elapsed = time.time() - prev
         start_time = time.time()
         # Read the video frame
         success, img = capture.read()
         # image_orignal=img.copy()
-        
+        # if time_elapsed > 1./frame_rate:
+        #     prev = time.time()
+            # print("here")
         # Find hands in the frame
         hands, img, blk_img = handDetector.findHands(img, blk=True)
 
@@ -187,9 +195,9 @@ def main():
 
 
             
-              
+            
     
-      
+    
         if cv2.waitKey(30) >= 0 :
                 break  
         cv2.imshow("Frame", img)
@@ -199,5 +207,5 @@ def main():
 if __name__ == "__main__":
     rospy.init_node("gesture_node")
     gesture_pub = rospy.Publisher(
-        "gesture_pose", String, queue_size=None,tcp_nodelay=False)
+        "gesture_pose", String, queue_size=10,tcp_nodelay=True)
     main()

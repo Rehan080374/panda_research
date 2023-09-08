@@ -1,13 +1,13 @@
 
 import sys
-import ogl_viewer.viewer as gl
+# import ogl_viewer.viewer as gl
 import pyzed.sl as sl
 import cv2
 import numpy as np
 from detection import HandDetector
-import tensorflow as tf
-import mediapipe as mp
-import rospy
+# import tensorflow as tf
+# import mediapipe as mp
+import rospymanoj 
 from geometry_msgs.msg import PointStamped
 def check_depth(depth,point) :
    
@@ -32,7 +32,7 @@ def main():
     # Create a Camera object
     object_length=0.8 #meters
     work_space=2 #meters
-    p = PointStamped()
+   
     zed = sl.Camera()
     hand_detector=HandDetector(maxHands=1,detectionCon=0.5)
     # Create a InitParameters object and set configuration parameters
@@ -85,6 +85,7 @@ def main():
     objects = sl.Objects()
     image = sl.Mat()
     depth=sl.Mat()
+    position="none"
     while zed.open():
         # Grab an image, a RuntimeParameters object must be given to grab()
         if zed.grab(runtime_parameters) == sl.ERROR_CODE.SUCCESS:
@@ -100,7 +101,7 @@ def main():
            
             # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             hands, img = hand_detector.findHands(img, blk=False) 
-            position="none"
+            # position="none"
             # img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             for object in objects.object_list:
                 print(len(objects.object_list))
@@ -108,49 +109,50 @@ def main():
                 object_position=object.position
                 print("object position {} object id {} ".format(object_position,object.id))
                
-              
-                if object_position[1] >0 and object_position[0]<=object_length:
-                    position="left"
-                elif object_position[1] <0 and object_position[0]<=object_length:
-                    position="right"
-                elif object_position[0]>object_length and object_position[0]<=work_space:
-                    position="center"
-                p.header.frame_id=position    
-                bbox= object.bounding_box_2d
-                bbox = np.asarray(bbox, dtype = 'int')
-                cv2.rectangle(img, (int(bbox[0][0]),int(bbox[0][1])),(int(bbox[2][0]),int(bbox[2][1])),
-                                        (255, 0, 255), 5)  
+                if object_position[0]<=work_space:
+                    if object_position[1] >0 and object_position[0]<=object_length:
+                        position="left"
+                    elif object_position[1] <0 and object_position[0]<=object_length:
+                        position="right"
+                    else:
+                        position="center"
+                    p.header.frame_id=position    
+                    bbox= object.bounding_box_2d
+                    bbox = np.asarray(bbox, dtype = 'int')
+                    cv2.rectangle(img, (int(bbox[0][0]),int(bbox[0][1])),(int(bbox[2][0]),int(bbox[2][1])),
+                                            (255, 0, 255), 5)  
 
-                # cv2.putText(img, position, ((bbox[0][0]) + 20, bbox[0][1] - 30), cv2.FONT_HERSHEY_PLAIN,
-                                    # 2, (255, 0, 255), 2) 
-                cv2.putText(img, position, (500,200), cv2.FONT_HERSHEY_PLAIN,
-                                    2, (255, 0, 255), 2)
-             
-            for hand in hands:
-                lm=hand["lmList"]
-                # print(lm[0][0]*width,lm[0][1]*height)
-                # center=hand["center"]
-                if (hand["type"]=="Left" and position=="right") or (hand["type"]=="Right" and position=="left"):
-                    center=[lm[17][0]*width,lm[17][1]*height]
-                    # print(center)
-                    distance =round(check_depth(depth,center),3)
-                    # print("radius = ",distance) 
-                    if distance >=object_length :
-                        distance =0
-                    p.point.x=distance 
-                    r=('radius' ,distance)
-                    print(r)
-                    cv2.putText(img, str(r), ((bbox[0][0]) +50, bbox[0][1] +50), cv2.FONT_HERSHEY_PLAIN,
-                                        2, (255, 0, 255), 2)   
-                else:
-                    p.point.x=0       
-           
+                    # cv2.putText(img, position, ((bbox[0][0]) + 20, bbox[0][1] - 30), cv2.FONT_HERSHEY_PLAIN,
+                                        # 2, (255, 0, 255), 2) 
+                    cv2.putText(img, position, (500,200), cv2.FONT_HERSHEY_PLAIN,
+                                        2, (255, 0, 255), 2)
+                    # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                    hands, img = hand_detector.findHands(img, blk=False) 
+                    for hand in hands:
+                        lm=hand["lmList"]
+                        # print(lm[0][0]*width,lm[0][1]*height)
+                        # center=hand["center"]
+                        if (hand["type"]=="Left" and position=="right") or (hand["type"]=="Right" and position=="left"):
+                            center=[lm[17][0]*width,lm[17][1]*height]
+                            # print(center)
+                            distance =round(check_depth(depth,center),3)
+                            # print("radius = ",distance) 
+                            if distance >=object_length  :
+                                distance =0
+                            p.point.x=distance 
+                            r=('radius' ,distance)
+                            print(r)
+                            cv2.putText(img, str(r), ((bbox[0][0]) +50, bbox[0][1] +50), cv2.FONT_HERSHEY_PLAIN,
+                                                2, (255, 0, 255), 2)   
+                        else:
+                            p.point.x=0       
+                
               
             pub.publish(p)     
-            cv2.imshow('MediaPipe Pose', img)    
+            cv2.imshow('Position tracking', img)    
             sys.stdout.flush()
         
-        if cv2.waitKey(30) >= 0 :
+        if cv2.waitKey(30) >= 0 or rospy.is_shutdown==True :
                 break        
     # viewer.exit()
     
@@ -170,5 +172,5 @@ if __name__ == "__main__":
     #     "my_equilibrium_pose", PoseStamped, queue_size=10)
     # string_pub =rospy.Publisher(
     #     "my_equilibrium_pose1", String, queue_size=10)
-    rate = rospy.Rate(100)
+    rate = rospy.Rate(10)
     main()
