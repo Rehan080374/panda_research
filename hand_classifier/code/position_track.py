@@ -7,7 +7,7 @@ import numpy as np
 from detection import HandDetector
 # import tensorflow as tf
 # import mediapipe as mp
-import rospymanoj 
+import rospy
 from geometry_msgs.msg import PointStamped
 def check_depth(depth,point) :
    

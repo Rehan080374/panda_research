@@ -10,10 +10,10 @@ from detection import HandDetector
 def main():
     folder = "/home/panda/model_data/cnn_data"
     # folder_orignal = "/home/rehan/catkin_ws/src/panda_research/hand_classifier/data/cnn_data"
-    class_name="ok"
-    starting_no=0
+    class_name="None"
+    starting_no=2500
     iteration = 0 
-    limit =2000
+    limit =500
     start_time=None
     recorded_array=None
 

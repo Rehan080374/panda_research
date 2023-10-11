@@ -36,7 +36,7 @@ def main():
     # rospy.init_node("gesture_node")
     # gesture_pub = rospy.Publisher(
     #     "gesture_pose", String, queue_size=10)
-    folder = "/home/panda/model_data/model9/"
+    folder = "/home/panda/model_data/model10/"
     # folder1=os.path.join(folder,class_name)
 
     model_path=os.path.join(folder,"keras_model.h5")

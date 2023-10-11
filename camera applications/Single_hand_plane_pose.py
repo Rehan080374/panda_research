@@ -316,7 +316,7 @@ def main():
                             ,hand_landmarks.landmark[17].y * image_height]], np.int32)
                         cent=centroid(pts)
                         
-                        euler_angles = check_angles(point_cloud,(pts[2]),(pts[3]),(pts[0]))
+                        # euler_angles = check_angles(point_cloud,(pts[2]),(pts[3]),(pts[0]))
                        
                         # print("euler angles = ",euler_angles)
                         # cent=[cent[0]-10,cent[1]-10]
@@ -346,11 +346,11 @@ def main():
                         if a>0 and b >0:
                             find_plane_status = cam.find_plane_at_hit(cent, plane)
                         if find_plane_status == sl.ERROR_CODE.SUCCESS:
-                            normal = plane.get_normal() # Get the normal vector of the detected plane
-                            plane_equation = plane.get_plane_equation() # Get (a,b,c,d) where ax+by+cz=d  
+                            # normal = plane.get_normal() # Get the normal vector of the detected plane
+                            # plane_equation = plane.get_plane_equation() # Get (a,b,c,d) where ax+by+cz=d  
                             # print(normal)
                             plane_pose=plane.get_pose()
-                            poly=plane.get_bounds()
+                            # poly=plane.get_bounds()
                             # print("polygon = ",poly)
                             # print("plane_pose = ",plane_pose)
                             # print("camera_pose = ",pose.pose_data())
@@ -361,12 +361,12 @@ def main():
                             if cent[0]>0 and cent[0]>0:
                                 _,xyz=point_cloud.get_value(cent[0],cent[1])
                                 print("x = ",round(xyz[0],3),"y = ",round(xyz[1],3),"z = ",round(xyz[2],3),"index=",index)
-                                marker_pose.pose.position.x =round(translation[0], 3)
-                                marker_pose.pose.position.y =round(translation[1], 3)
-                                marker_pose.pose.position.z =round(translation[2], 3)
-                                # marker_pose.pose.position.x =round(xyz[0], 3)
-                                # marker_pose.pose.position.y =round(xyz[1], 3)
-                                # marker_pose.pose.position.z =round(xyz[2], 3)
+                                # marker_pose.pose.position.x =round(translation[0], 3)
+                                # marker_pose.pose.position.y =round(translation[1], 3)
+                                # marker_pose.pose.position.z =round(translation[2], 3)
+                                marker_pose.pose.position.x =round(xyz[0], 3)
+                                marker_pose.pose.position.y =round(xyz[1], 3)
+                                marker_pose.pose.position.z =round(xyz[2], 3)
                                 marker_pose.pose.orientation.x =round(orient[0], 3)
                                 marker_pose.pose.orientation.y =round(orient[1], 3)
                                 marker_pose.pose.orientation.z =round(orient[2], 3)
