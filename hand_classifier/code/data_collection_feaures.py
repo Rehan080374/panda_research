@@ -10,10 +10,11 @@ from detection import HandDetector
 def main():
     folder = "/home/panda/model_data/cnn_data"
     # folder_orignal = "/home/rehan/catkin_ws/src/panda_research/hand_classifier/data/cnn_data"
-    class_name="None"
-    starting_no=2500
+    class_name="pics"
+    starting_no=0
     iteration = 0 
     limit =500
+
     start_time=None
     recorded_array=None
 
@@ -110,7 +111,7 @@ def main():
                         np.save(file_name, combined_array)
                         print(f"Recorded array has been saved to {file_name}")
                         folder1=os.path.join(folder,class_name)
-                        cv2.imwrite(f'{folder1}/image_{class_name}_{iteration+starting_no}.jpg',image_orignal) 
+                        cv2.imwrite(f'{folder1}/image_{class_name}_{iteration+starting_no}.jpg',img) 
                     print("Recorded Array:", len(combined_array))
                     # print("Recorded Array:", (combined_array.shape))
                     # Increment the iteration counter
